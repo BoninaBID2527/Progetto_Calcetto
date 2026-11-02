@@ -1,0 +1,30 @@
+# Dipendenze
+node_modules/
+
+# Ambiente e segreti
+.env
+.env.*
+!.env.example
+
+# Build e cache
+dist/
+build/
+coverage/
+.vite/
+*.log
+npm-debug.log*
+
+# Playwright
+e2e/test-results/
+e2e/playwright-report/
+e2e/blob-report/
+e2e/.auth/
+
+# Sistema operativo ed editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Archivi di consegna
+*.zip

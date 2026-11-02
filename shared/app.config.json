@@ -1,0 +1,37 @@
+{
+  "appName": "BONMATCH",
+  "tagline": "Il calcetto tra amici, organizzato come si deve.",
+  "timeZone": "Europe/Rome",
+  "fields": [
+    { "key": "cambiano", "name": "Cambiano", "town": "Cambiano (TO)", "color": "#4CC9F0", "symbol": "campanile" },
+    { "key": "santena", "name": "Santena", "town": "Santena (TO)", "color": "#B8E35A", "symbol": "asparago" },
+    { "key": "moncalieri", "name": "Moncalieri", "town": "Moncalieri (TO)", "color": "#C9A0FF", "symbol": "castello" },
+    { "key": "villastellone", "name": "Villastellone", "town": "Villastellone (TO)", "color": "#FFD23F", "symbol": "stella" }
+  ],
+  "prizeOptions": [
+    { "key": "birra", "label": "Birra", "emoji": "🍺" },
+    { "key": "pizza", "label": "Pizza", "emoji": "🍕" },
+    { "key": "panino", "label": "Panino", "emoji": "🥪" }
+  ],
+  "reactions": ["👍", "😂", "🔥", "⚽", "👏", "😮"],
+  "roles": [
+    { "key": "portiere", "label": "Portiere" },
+    { "key": "difensore", "label": "Difensore" },
+    { "key": "centrocampista", "label": "Centrocampista" },
+    { "key": "attaccante", "label": "Attaccante" }
+  ],
+  "feet": [
+    { "key": "destro", "label": "Destro" },
+    { "key": "sinistro", "label": "Sinistro" },
+    { "key": "ambidestro", "label": "Ambidestro" }
+  ],
+  "defaults": {
+    "slots": 10,
+    "durationMinutes": 60,
+    "minMatchesForRanking": 3,
+    "minMatchesForUnlucky": 5,
+    "votingHours": 48,
+    "newPlayerRating": 5,
+    "teamNames": ["Maglie chiare", "Maglie scure"]
+  }
+}

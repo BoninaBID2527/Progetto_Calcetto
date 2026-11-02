@@ -1,0 +1,13 @@
+# Solo MongoDB: backend e frontend si avviano con npm (vedi README).
+services:
+  mongo:
+    image: mongo:7
+    container_name: bonmatch-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - bonmatch-mongo-data:/data/db
+
+volumes:
+  bonmatch-mongo-data:
