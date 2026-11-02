@@ -1,0 +1,46 @@
+'use strict';
+
+const { Schema, model } = require('mongoose');
+const { DEFAULTS } = require('../config/appConfig');
+
+const memberSchema = new Schema(
+  {
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    role: { type: String, enum: ['admin', 'member'], default: 'member' },
+    joinedAt: { type: Date, default: Date.now },
+    lastReadAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
+const prizeOptionSchema = new Schema(
+  {
+    key: { type: String, required: true },
+    label: { type: String, required: true, maxlength: 24 },
+    emoji: { type: String, required: true, maxlength: 8 },
+  },
+  { _id: false }
+);
+
+const groupSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 50 },
+    description: { type: String, default: '', maxlength: 280 },
+    emoji: { type: String, default: '⚽', maxlength: 8 },
+    color: { type: String, default: '#2EE59D' },
+    inviteCode: { type: String, required: true, unique: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    members: { type: [memberSchema], default: [] },
+    settings: {
+      organizers: { type: String, enum: ['tutti', 'admin'], default: 'tutti' },
+      minMatchesForRanking: { type: Number, default: DEFAULTS.minMatchesForRanking, min: 1, max: 50 },
+      loserPaysFirstRound: { type: Boolean, default: false },
+      extraPrizeOptions: { type: [prizeOptionSchema], default: [] },
+    },
+  },
+  { timestamps: true }
+);
+
+groupSchema.index({ 'members.user': 1 });
+
+module.exports = model('Group', groupSchema);
