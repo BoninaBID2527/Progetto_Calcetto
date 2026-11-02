@@ -14,6 +14,9 @@ const registration = require('./registration');
 
 // ------------------------------------------------------------------ DTO
 
+/** Stato del pagamento; per i dati della V1 (solo `paid`) vale "verificato" se era segnato pagato. */
+const paymentOf = (p) => p.payment && p.payment !== 'da_pagare' ? p.payment : p.paid ? 'verificato' : 'da_pagare';
+
 const quotaCents = (match, confirmed) => (match.costCents > 0 && confirmed > 0 ? Math.ceil(match.costCents / confirmed) : null);
 
 function toDto(match, resolve) {
@@ -28,7 +31,8 @@ function toDto(match, resolve) {
     respondedAt: p.respondedAt,
     waitlistedAt: p.waitlistedAt,
     promotedAt: p.promotedAt,
-    paid: Boolean(p.paid),
+    payment: paymentOf(p),
+    paid: paymentOf(p) === 'verificato',
   });
   const team = (t) => (t ? { name: t.name, players: t.players.map((id) => resolve(id)) } : null);
 
@@ -52,7 +56,8 @@ function toDto(match, resolve) {
       non_ci_sono: match.participants.filter((p) => p.response === 'non_ci_sono').length,
     },
     quotaCents: quotaCents(match, confirmed.length),
-    paidCount: confirmed.filter((p) => p.paid).length,
+    paidCount: confirmed.filter((p) => paymentOf(p) === 'verificato').length,
+    declaredCount: confirmed.filter((p) => paymentOf(p) === 'dichiarato').length,
     teams: match.teams
       ? { a: team(match.teams.a), b: team(match.teams.b), method: match.teams.method, updatedAt: match.teams.updatedAt }
       : null,
@@ -315,7 +320,7 @@ async function respond(match, user, response) {
   });
 
   if (freedSlot) {
-    await Match.updateOne({ _id: match._id }, { $set: { 'participants.$[me].paid': false } }, { arrayFilters: [{ 'me.user': uid }] });
+    await require('./cashboxService').onLeft(match, uid);
     if (updated.teams) {
       await Match.updateOne({ _id: match._id, teams: { $ne: null } }, { $pull: { 'teams.a.players': uid, 'teams.b.players': uid } });
     }
@@ -335,19 +340,9 @@ async function respond(match, user, response) {
   return { match: dto, outcome, promoted: promoted.map(String) };
 }
 
-async function setPayment(match, actor, isManager, targetId, paid) {
-  const target = match.participants.find((p) => sameId(p.user, targetId));
-  if (!target || target.response !== 'ci_sono') {
-    throw unprocessable('La quota riguarda solo i presenti.', { userId: 'Questa persona non è tra i presenti.' });
-  }
-  if (!sameId(actor._id, targetId) && !isManager) {
-    throw forbidden("Puoi segnare solo il tuo pagamento; gli altri li gestisce l'organizzatore.");
-  }
-  await Match.updateOne(
-    { _id: match._id },
-    { $set: { 'participants.$[t].paid': paid, 'participants.$[t].paidUpdatedBy': actor._id } },
-    { arrayFilters: [{ 't.user': target.user }] }
-  );
+/** Pagamento della quota: dichiarato dal giocatore, confermato da chi riceve (vedi cashboxService). */
+async function setPayment(match, actor, isManager, targetId, payment) {
+  await require('./cashboxService').setQuota(match, actor, isManager, targetId, payment);
   return broadcast(match._id);
 }
 

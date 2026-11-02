@@ -214,10 +214,14 @@ describe('Stati, quote e pagamenti', () => {
     await respond(c, match);
     const self = await api().patch(`/api/matches/${match.id}/participants/${b.user.id}/payment`).set(b.auth).send({ paid: true });
     expect(self.status).toBe(200);
-    expect(self.body.match.paidCount).toBe(1);
+    // Dalla V2 chi paga può solo dichiarare: il pagamento conta (paidCount) quando lo conferma chi riceve il denaro.
+    expect(self.body.match.paidCount).toBe(0);
+    expect(self.body.match.declaredCount).toBe(1);
     expect((await api().patch(`/api/matches/${match.id}/participants/${c.user.id}/payment`).set(b.auth).send({ paid: true })).status).toBe(403);
     const byOrganizer = await api().patch(`/api/matches/${match.id}/participants/${c.user.id}/payment`).set(a.auth).send({ paid: true });
-    expect(byOrganizer.body.match.paidCount).toBe(2);
+    expect(byOrganizer.body.match.paidCount).toBe(1);
+    const confirm = await api().patch(`/api/matches/${match.id}/participants/${b.user.id}/payment`).set(a.auth).send({ paid: true });
+    expect(confirm.body.match.paidCount).toBe(2);
     // Non si paga per chi non è tra i presenti.
     expect((await api().patch(`/api/matches/${match.id}/participants/${a.user.id}/payment`).set(a.auth).send({ paid: true })).status).toBe(422);
   });

@@ -5,6 +5,7 @@ const nicknameService = require('../services/nicknameService');
 const dashboardService = require('../services/dashboardService');
 const activityService = require('../services/activityService');
 const seasonService = require('../services/seasonService');
+const cashboxService = require('../services/cashboxService');
 const clubService = require('../services/clubService');
 const hallOfFameService = require('../services/hallOfFameService');
 
@@ -63,7 +64,18 @@ const club = async (req, res) => res.json({ club: await clubService.profile(req.
 const setClubImage = (kind) => async (req, res) => res.json({ group: await clubService.setImage(req.group, req.user, kind, req.file) });
 const removeClubImage = (kind) => async (req, res) => res.json({ group: await clubService.removeImage(req.group, req.user, kind) });
 
+const cashbox = async (req, res) => res.json({ cashbox: await cashboxService.summary(req.group, req.user) });
+const ledger = async (req, res) => res.json(await cashboxService.ledger(req.group, req.user, req.validQuery));
+const createEntry = async (req, res) => res.status(201).json({ entry: await cashboxService.createEntry(req.group, req.user, req.body) });
+const verifyEntry = async (req, res) => res.json({ entry: await cashboxService.verify(req.group, req.user, req.params.entryId) });
+const cancelEntry = async (req, res) => res.json({ entry: await cashboxService.cancel(req.group, req.user, req.params.entryId, req.body.reason) });
+
 module.exports = {
+  cashbox,
+  ledger,
+  createEntry,
+  verifyEntry,
+  cancelEntry,
   club,
   setClubImage,
   removeClubImage,

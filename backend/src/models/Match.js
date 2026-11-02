@@ -11,6 +11,8 @@ const participantSchema = new Schema(
     respondedAt: { type: Date, default: Date.now },
     waitlistedAt: { type: Date, default: null },
     promotedAt: { type: Date, default: null },
+    // Stato del pagamento della quota: dichiarato dal giocatore, verificato da chi riceve. `paid` resta per compatibilità (= verificato).
+    payment: { type: String, enum: ['da_pagare', 'dichiarato', 'verificato'], default: 'da_pagare' },
     paid: { type: Boolean, default: false },
     paidUpdatedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   },

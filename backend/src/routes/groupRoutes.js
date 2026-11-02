@@ -66,6 +66,11 @@ router.delete('/:groupId/availability/:date', inGroup, calCtrl.clearAvailability
 router.get('/:groupId/seasons', inGroup, ctrl.listSeasons);
 router.post('/:groupId/seasons', admin, validate({ body: gv.createSeason }), ctrl.createSeason);
 router.delete('/:groupId/seasons/:seasonId', admin, validIds('seasonId'), ctrl.removeSeason);
+router.get('/:groupId/cashbox', inGroup, ctrl.cashbox);
+router.get('/:groupId/ledger', inGroup, validate({ query: gv.ledgerQuery }), ctrl.ledger);
+router.post('/:groupId/ledger', inGroup, validate({ body: gv.createEntry }), ctrl.createEntry);
+router.post('/:groupId/ledger/:entryId/verify', inGroup, validIds('entryId'), ctrl.verifyEntry);
+router.post('/:groupId/ledger/:entryId/cancel', inGroup, validIds('entryId'), validate({ body: gv.cancelEntry }), ctrl.cancelEntry);
 router.get('/:groupId/club', inGroup, ctrl.club);
 router.put('/:groupId/club/crest', admin, uploadImage(LIMITS.crest), ctrl.setClubImage('crest'));
 router.delete('/:groupId/club/crest', admin, ctrl.removeClubImage('crest'));

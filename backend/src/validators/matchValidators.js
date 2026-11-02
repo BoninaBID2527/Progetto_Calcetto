@@ -36,7 +36,12 @@ const changeStatus = z.object({ status: z.enum(['aperta', 'chiusa', 'annullata',
 
 const respond = z.object({ response: z.enum(RESPONSES) }).strict();
 
-const payment = z.object({ paid: z.boolean() }).strict();
+// Compatibile con la V1 ({ paid }): paid:true = "dichiarato" per chi paga, "verificato" per l'organizzatore.
+const payment = z
+  .object({ paid: z.boolean(), payment: z.enum(['da_pagare', 'dichiarato', 'verificato']) })
+  .partial()
+  .strict()
+  .refine((v) => v.paid !== undefined || v.payment !== undefined, { message: 'Indica lo stato del pagamento.', path: ['payment'] });
 
 const team = z.object({ name: z.string().trim().min(1).max(30).optional(), players: z.array(objectId).min(1).max(15) }).strict();
 const setTeams = z.object({ a: team, b: team }).strict();

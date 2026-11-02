@@ -13,6 +13,32 @@ function Section({ title, icon, people, render, empty }) {
   );
 }
 
+const PAYMENT_LABEL = { da_pagare: 'Da pagare', dichiarato: 'Dichiarato', verificato: 'Pagato' };
+
+/**
+ * Pagamento della quota in tre stati: chi paga dichiara, chi riceve il denaro
+ * (organizzatore o admin) conferma. Un pagamento dichiarato non vale come pagato.
+ */
+function PaymentControl({ p, mine, canManage, busy, onPayment }) {
+  const label = `${PAYMENT_LABEL[p.payment]}: ${p.user.name}`;
+  const chip = <span className={`chip ${p.payment === 'verificato' ? 'chip-primary' : p.payment === 'dichiarato' ? 'chip-yellow' : ''}`}>{PAYMENT_LABEL[p.payment]}</span>;
+  const act = (target, text, icon, variant = '') => (
+    <button type="button" className={`btn btn-sm ${variant}`} disabled={busy} onClick={() => onPayment(p.user.id, target)} aria-label={`${text}: ${p.user.name}`}>
+      {icon && <Icon name={icon} />} {text}
+    </button>
+  );
+  return (
+    <span className="row" style={{ gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }} aria-label={label}>
+      {chip}
+      {p.payment === 'da_pagare' && mine && act('dichiarato', 'Ho pagato', 'wallet')}
+      {p.payment === 'da_pagare' && canManage && !mine && act('verificato', 'Conferma incasso', 'check', 'btn-primary')}
+      {p.payment === 'dichiarato' && canManage && act('verificato', 'Conferma', 'check', 'btn-primary')}
+      {p.payment === 'dichiarato' && (mine || canManage) && act('da_pagare', 'Ritira', 'x')}
+      {p.payment === 'verificato' && canManage && act('da_pagare', 'Revoca', 'x')}
+    </span>
+  );
+}
+
 export default function ParticipantsPanel({ match, meId, canManage, onPayment, busy }) {
   const by = (r) => match.participants.filter((p) => p.response === r);
   const confirmed = by('ci_sono');
@@ -33,7 +59,8 @@ export default function ParticipantsPanel({ match, meId, canManage, onPayment, b
       </div>
       {hasCost && (
         <p className="muted" style={{ fontSize: '0.88rem' }}>
-          Campo {formatEuro(match.costCents)} · pagato da {match.paidCount} su {confirmed.length}
+          Campo {formatEuro(match.costCents)} · pagato (confermato) da {match.paidCount} su {confirmed.length}
+          {match.declaredCount > 0 && ` · ${match.declaredCount} in attesa di conferma`}
         </p>
       )}
       <Section
@@ -43,34 +70,13 @@ export default function ParticipantsPanel({ match, meId, canManage, onPayment, b
         empty="Nessuno per ora. Il primo che dice «ci sono» sceglie la maglia."
         render={(p, i) => {
           const mine = p.user.id === meId;
-          const editable = hasCost && (mine || canManage);
           return (
             <li key={p.user.id} className={`people-enter ${mine ? 'is-me' : ''}`}>
               <span className="pos">{i + 1}</span>
               <span className="grow">
                 <Player user={p.user} size={36} showRole sub={p.promotedAt ? "Entrato dalla lista d'attesa" : null} />
               </span>
-              {hasCost &&
-                (editable ? (
-                  <button
-                    type="button"
-                    className={`btn btn-sm ${p.paid ? 'btn-primary' : ''}`}
-                    aria-pressed={p.paid}
-                    disabled={busy}
-                    onClick={() => onPayment(p.user.id, !p.paid)}
-                    aria-label={`${p.paid ? 'Pagato' : 'Da pagare'}: ${p.user.name}. Tocca per cambiare`}
-                  >
-                    {p.paid ? (
-                      <>
-                        <Icon name="check" /> Pagato
-                      </>
-                    ) : (
-                      'Da pagare'
-                    )}
-                  </button>
-                ) : (
-                  <span className={`chip ${p.paid ? 'chip-primary' : ''}`}>{p.paid ? 'Pagato' : 'Da pagare'}</span>
-                ))}
+              {hasCost && <PaymentControl p={p} mine={mine} canManage={canManage} busy={busy} onPayment={onPayment} />}
             </li>
           );
         }}

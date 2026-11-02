@@ -19,7 +19,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M10 | Premi partita e achievement | ✅ |
 | M11 | Club personalizzati (stemma, colori, maglie, copertina) | ✅ |
 | M12 | Calendario intelligente e partite ricorrenti | ✅ |
-| M13 | Cassa del gruppo (registro dichiarato/verificato) | ⏳ |
+| M13 | Cassa del gruppo (registro dichiarato/verificato) | ✅ |
 | M14 | Terzo tempo evoluto | ⏳ |
 | M15 | BONWRAPPED | ⏳ |
 | M16 | Revisione schermate, test e2e, accessibilità, responsive | ⏳ |
@@ -204,3 +204,15 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Frontend: `/calendario` con vista mese, settimana, prossime e passate, filtro per gruppo, dettaglio del giorno, disponibilità, pannello ricorrenze (modifica, ferma, ferma e annulla), esportazione `.ics` (con token nell'header, nessun URL di sottoscrizione pubblico), "Ripeti ogni settimana" in Nuova partita. Verificato a 1280 e 390 px senza overflow.
 - Test: 200 backend verdi (17 nuovi in `calendar.test.js`: ora legale 2026/2027, idempotenza in parallelo, occorrenze annullate/modificate, permessi, fuso del gruppo, calendario, disponibilità, `.ics`).
 - Limiti: niente sottoscrizione `webcal://` (richiederebbe un token nell'URL); il fuso si imposta via API (`settings.timezone`) ma non ha ancora un campo nelle impostazioni dell'interfaccia; le frecce del calendario non gestiscono gesti di scorrimento.
+
+### M13 — Cassa del gruppo (✅)
+- Registro contabile interno (`LedgerEntry`): tipi `quota`, `versamento`, `spesa`, `rimborso`; stati `dichiarato` → `verificato` → `annullato`; ogni passaggio finisce nello storico della voce (chi, quando, da/a, nota) e le voci non si cancellano mai. Nessuna transazione reale: l'interfaccia lo dichiara ovunque.
+- Regola cardine: **un pagamento dichiarato non vale finché chi riceve il denaro (organizzatore della partita o admin) non lo conferma**. Chi paga può solo dichiarare o ritirare; solo chi riceve conferma o revoca (la revoca lascia traccia). I passaggi sono atomici (`findOneAndUpdate` con stato di partenza) e le quote hanno indice unico per partita e membro: richieste simultanee non duplicano né confermano due volte.
+- `Match.participants[].payment` (`da_pagare|dichiarato|verificato`) specchia la voce; `paid` resta ed è derivato (`verificato`); i dati V1 con solo `paid` sono letti come verificati. La rotta `PATCH /matches/:mid/participants/:uid/payment` accetta `{payment}` e, per compatibilità, `{paid}` (dichiara per chi paga, conferma per l'organizzatore). Chi lascia la partita: la dichiarazione decade, il denaro confermato resta come credito.
+- Saldi per membro (`GET /groups/:id/cashbox`): dovuto (partite chiuse o giocate, quota = costo ÷ presenti), pagato, versato, spese anticipate, rimborsi; contano solo le voci confermate, le dichiarate sono esposte a parte. Gli admin vedono tutti i saldi, un membro solo il proprio. Riepilogo per partita (costo, quota, confermato, dichiarato, mancante) e `GET /matches/:mid/payments`.
+- Cassa comune facoltativa (`settings.cashbox`, solo admin): versamenti (un membro dichiara, l'admin conferma) e spese dalla cassa; il fondo è fatto solo di versamenti confermati meno uscite (le quote pagano il campo e non entrano nel fondo). Spese e rimborsi li registra un admin. Storico paginato `GET /groups/:id/ledger` (admin: tutto; membro: le proprie voci e le spese), `POST /groups/:id/ledger`, `.../verify`, `.../cancel` (motivo obbligatorio per una voce già confermata).
+- Notifiche `pagamento` (categoria "partite") all'organizzatore quando qualcuno dichiara e al giocatore quando è confermato.
+- Migrazione: `npm run migrate` importa i `paid: true` della V1 come quote verificate (storico "importato"), una sola volta (testato).
+- Frontend: stato a tre livelli nella partita (Ho pagato / Conferma / Ritira / Revoca), pagina Cassa (saldo, quote, spese, cassa comune, da confermare, riepilogo per partita, saldi degli admin, storico con dettaglio dei passaggi, registrazione di voci), interruttore della cassa comune nelle impostazioni.
+- Test: 213 backend verdi (13 nuovi in `cashbox.test.js`). **Modificato un test V1** (`matches.test.js`, pagamenti): prima un giocatore poteva segnarsi "pagato" da solo e contava subito; ora conta solo dopo la conferma (requisito della V2), quindi l'asserzione sul `paidCount` è stata aggiornata e ne sono state aggiunte altre.
+- Limiti: nessun import/esporta del registro (CSV); le voci di un gruppo non si spostano tra gruppi; un solo livello di ruoli (admin/organizzatore) senza un "cassiere" dedicato.

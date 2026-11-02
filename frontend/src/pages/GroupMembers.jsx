@@ -399,6 +399,19 @@ function SettingsCard({ group }) {
       <SeasonSettings group={group} settings={settings} update={update} />
       <AwardSettings settings={settings} update={update} error={error} />
       <div className="field">
+        <span className="label">Cassa comune</span>
+        <Segmented
+          label="Cassa comune"
+          value={settings.cashbox ? 'si' : 'no'}
+          onChange={(v) => update({ cashbox: v === 'si' })}
+          options={[
+            { value: 'no', label: 'Solo quote' },
+            { value: 'si', label: 'Con cassa comune' },
+          ]}
+        />
+        <span className="player-sub" style={{ whiteSpace: 'normal' }}>È solo un registro: serve a versamenti e spese del gruppo, nessun denaro passa da BONMATCH.</span>
+      </div>
+      <div className="field">
         <span className="label">Chi perde offre il primo giro</span>
         <Segmented
           label="Chi perde offre il primo giro"

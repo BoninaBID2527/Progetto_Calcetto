@@ -17,6 +17,7 @@ const NOTIFICATION_TYPES = [
   'premio',
   'record',
   'rivalita',
+  'pagamento',
 ];
 
 // Categoria usata dalle preferenze dell'utente (in-app e push).
@@ -35,6 +36,7 @@ const CATEGORY_OF = {
   premio: 'social',
   record: 'social',
   rivalita: 'social',
+  pagamento: 'partite',
 };
 
 // Notifiche che non si possono spegnere: riguardano un posto già preso o una partita saltata.

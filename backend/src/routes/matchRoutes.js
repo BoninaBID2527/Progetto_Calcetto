@@ -22,6 +22,7 @@ router.get('/:matchId', inMatch, ctrl.show);
 router.patch('/:matchId', manager, validate({ body: v.updateMatch }), ctrl.update);
 router.post('/:matchId/status', manager, validate({ body: v.changeStatus }), ctrl.changeStatus);
 router.put('/:matchId/response', inMatch, validate({ body: v.respond }), ctrl.respond);
+router.get('/:matchId/payments', inMatch, ctrl.payments);
 router.patch('/:matchId/participants/:userId/payment', inMatch, validIds('userId'), validate({ body: v.payment }), ctrl.setPayment);
 
 // Squadre e dopo partita

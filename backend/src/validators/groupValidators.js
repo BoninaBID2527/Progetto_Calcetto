@@ -20,6 +20,7 @@ const settings = z
     organizers: z.enum(['tutti', 'admin']),
     minMatchesForRanking: int(1, 50),
     loserPaysFirstRound: z.boolean(),
+    cashbox: z.boolean(),
     timezone: z.string().refine(isValidZone, 'Fuso orario non valido (es. Europe/Rome).'),
     extraPrizeOptions: z.array(z.object({ label: trimmed(1, 24), emoji }).strict()).max(5),
     awards: z
@@ -65,6 +66,25 @@ const createSeason = z
   .object({ name: trimmed(2, 40), startsAt: isoDate, endsAt: isoDate })
   .strict()
   .refine((v) => v.endsAt > v.startsAt, { path: ['endsAt'], message: "La fine deve venire dopo l'inizio." });
+const cents = z.number().int().min(1, "L'importo deve essere maggiore di zero.").max(1_000_000, 'Importo troppo alto.');
+const createEntry = z
+  .object({
+    type: z.enum(['versamento', 'spesa', 'rimborso']),
+    amountCents: cents,
+    note: z.string().trim().max(200).default(''),
+    userId: objectId.optional(),
+    paidFrom: z.enum(['cassa', 'membro']).optional(),
+    matchId: objectId.optional(),
+  })
+  .strict();
+const cancelEntry = z.object({ reason: z.string().trim().max(200).default('') }).strict();
+const ledgerQuery = z.object({
+  type: z.enum(['quota', 'versamento', 'spesa', 'rimborso']).optional(),
+  status: z.enum(['dichiarato', 'verificato', 'annullato']).optional(),
+  userId: objectId.optional(),
+  before: objectId.optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(30),
+});
 const versusQuery = z.object({ with: objectId.optional() });
 
-module.exports = { createSeason, proposeRivalry, versusQuery, createGroup, updateGroup, join, setRole, proposeNickname, replaceNickname, listNicknames };
+module.exports = { createEntry, cancelEntry, ledgerQuery, createSeason, proposeRivalry, versusQuery, createGroup, updateGroup, join, setRole, proposeNickname, replaceNickname, listNicknames };

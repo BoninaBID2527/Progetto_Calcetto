@@ -45,6 +45,8 @@ const groupSchema = new Schema(
       minMatchesForRanking: { type: Number, default: DEFAULTS.minMatchesForRanking, min: 1, max: 50 },
       loserPaysFirstRound: { type: Boolean, default: false },
       extraPrizeOptions: { type: [prizeOptionSchema], default: [] },
+      // Cassa comune facoltativa: senza, il registro tiene solo le quote delle partite.
+      cashbox: { type: Boolean, default: false },
       timezone: { type: String, default: 'Europe/Rome' },
       // Premi di partita facoltativi, spenti finché un admin non li attiva.
       awards: {

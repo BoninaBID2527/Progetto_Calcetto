@@ -34,6 +34,7 @@ function summary(group, userId, extra = {}) {
       minMatchesForRanking: group.settings.minMatchesForRanking,
       loserPaysFirstRound: group.settings.loserPaysFirstRound,
       timezone: group.settings.timezone || 'Europe/Rome',
+      cashbox: Boolean(group.settings.cashbox),
       extraPrizeOptions: group.settings.extraPrizeOptions.map((o) => ({ key: o.key, label: o.label, emoji: o.emoji })),
       awards: {
         portiere: Boolean(group.settings.awards?.portiere),

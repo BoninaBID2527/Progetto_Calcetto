@@ -22,7 +22,13 @@ const changeStatus = async (req, res) => res.json({ match: await matchService.ch
 const respond = async (req, res) => res.json(await matchService.respond(req.match, req.user, req.body.response));
 
 async function setPayment(req, res) {
-  res.json({ match: await matchService.setPayment(req.match, req.user, canManageMatch(req), req.params.userId, req.body.paid) });
+  const manager = canManageMatch(req);
+  const { paid, payment } = req.body;
+  // V1: { paid: true } = "ho pagato" (dichiarato); per chi riceve il denaro vale come conferma.
+  const target = payment || (paid ? (manager && req.params.userId !== String(req.user._id) ? 'verificato' : 'dichiarato') : 'da_pagare');
+  res.json({ match: await matchService.setPayment(req.match, req.user, manager, req.params.userId, target) });
 }
 
-module.exports = { list, create, show, update, changeStatus, respond, setPayment };
+const payments = async (req, res) => res.json({ payments: await require('../services/cashboxService').forMatch(req.match) });
+
+module.exports = { list, create, show, update, changeStatus, respond, setPayment, payments };

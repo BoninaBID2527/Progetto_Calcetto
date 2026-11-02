@@ -112,10 +112,10 @@ export default function MatchDetail() {
     }
   };
 
-  const setPayment = async (userId, paid) => {
+  const setPayment = async (userId, payment) => {
     setBusy(true);
     try {
-      const res = await api(`/matches/${match.id}/participants/${userId}/payment`, { method: 'PATCH', body: { paid } });
+      const res = await api(`/matches/${match.id}/participants/${userId}/payment`, { method: 'PATCH', body: { payment } });
       setData((d) => ({ ...d, match: res.match }));
     } catch (err) {
       toast.error(err.message);

@@ -17,6 +17,7 @@ module.exports = {
   Season: require('./Season'),
   Achievement: require('./Achievement'),
   MatchSeries: require('./MatchSeries'),
+  LedgerEntry: require('./LedgerEntry'),
   Availability: require('./Availability'),
   MvpVote,
   Rating,
