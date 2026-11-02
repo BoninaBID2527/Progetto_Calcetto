@@ -85,6 +85,7 @@ const ledgerQuery = z.object({
   before: objectId.optional(),
   limit: z.coerce.number().int().min(1).max(100).default(30),
 });
+const thirdHalfQuery = z.object({ period: z.enum(['stagione', 'sempre']).default('sempre'), season: z.string().trim().min(1).max(40).optional(), limit: z.coerce.number().int().min(1).max(100).default(30) });
 const versusQuery = z.object({ with: objectId.optional() });
 
-module.exports = { createEntry, cancelEntry, ledgerQuery, createSeason, proposeRivalry, versusQuery, createGroup, updateGroup, join, setRole, proposeNickname, replaceNickname, listNicknames };
+module.exports = { thirdHalfQuery, createEntry, cancelEntry, ledgerQuery, createSeason, proposeRivalry, versusQuery, createGroup, updateGroup, join, setRole, proposeNickname, replaceNickname, listNicknames };

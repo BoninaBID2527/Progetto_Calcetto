@@ -3,10 +3,12 @@ import Icon from '../Icon';
 import PrizeArt from '../PrizeArt';
 import { api } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
+import { Countdown } from '../ui';
+import { formatDateTime } from '../../utils/format';
 
 const CONFETTI_COLORS = ['#2EE59D', '#FF8A3D', '#FFD23F', '#4CC9F0', '#FF7AA2'];
 
-function Confetti() {
+export function Confetti() {
   return (
     <span className="confetti" aria-hidden="true">
       {Array.from({ length: 22 }, (_, i) => (
@@ -73,6 +75,11 @@ export default function PrizePanel({ match, voting, report, onChange }) {
         <p className="muted">Nessuno ha votato: ognuno a casa sua, stavolta.</p>
       ) : (
         <>
+          {voting.mvp?.closesAt && (
+            <p className="chip chip-orange" style={{ width: 'fit-content' }}>
+              <Icon name="timer" /> Si vota fino a {formatDateTime(voting.mvp.closesAt)} · <Countdown to={voting.mvp.closesAt} label="Mancano" compact />
+            </p>
+          )}
           <p className="muted">{voting.isPlayer ? (prize.myVote ? 'Hai votato: aspettiamo gli altri.' : 'Dove si va dopo la partita? Un voto a testa.') : 'Votano i giocatori della partita.'}</p>
           <div className="prize-options" role="radiogroup" aria-label="Scegli il terzo tempo">
             {prize.options.map((o) => (

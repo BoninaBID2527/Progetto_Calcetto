@@ -20,7 +20,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M11 | Club personalizzati (stemma, colori, maglie, copertina) | ✅ |
 | M12 | Calendario intelligente e partite ricorrenti | ✅ |
 | M13 | Cassa del gruppo (registro dichiarato/verificato) | ✅ |
-| M14 | Terzo tempo evoluto | ⏳ |
+| M14 | Terzo tempo evoluto | ✅ |
 | M15 | BONWRAPPED | ⏳ |
 | M16 | Revisione schermate, test e2e, accessibilità, responsive | ⏳ |
 | M17 | Documentazione e consegna | ⏳ |
@@ -216,3 +216,10 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Frontend: stato a tre livelli nella partita (Ho pagato / Conferma / Ritira / Revoca), pagina Cassa (saldo, quote, spese, cassa comune, da confermare, riepilogo per partita, saldi degli admin, storico con dettaglio dei passaggi, registrazione di voci), interruttore della cassa comune nelle impostazioni.
 - Test: 213 backend verdi (13 nuovi in `cashbox.test.js`). **Modificato un test V1** (`matches.test.js`, pagamenti): prima un giocatore poteva segnarsi "pagato" da solo e contava subito; ora conta solo dopo la conferma (requisito della V2), quindi l'asserzione sul `paidCount` è stata aggiornata e ne sono state aggiunte altre.
 - Limiti: nessun import/esporta del registro (CSV); le voci di un gruppo non si spostano tra gruppi; un solo livello di ruoli (admin/organizzatore) senza un "cassiere" dedicato.
+
+### M14 — Terzo tempo evoluto (✅)
+- `GET /groups/:id/third-half?period=sempre|stagione` oppure `?season=<chiave>` (`limit` 1-100): votazioni **in corso** (scadenza, quanti hanno scelto), **storico** serata per serata (vincitori, voti per opzione, partecipazione, risultato) e **statistiche** (serate, voti, partecipazione, preferenze con vittorie e quota di voti, premio più scelto con parità, serie di vittorie consecutive della stessa opzione). Solo dati aggregati: chi ha votato cosa resta anonimo. Le votazioni scadute vengono chiuse prima della lettura.
+- "Chi perde offre il primo giro": resta facoltativo e **solo informativo** (compare nello storico se il gruppo lo ha attivato, con il pareggio "alla romana"); nessun importo, nessun debito, nessun legame con la cassa (verificato nei test).
+- Frontend: pagina `/gruppi/:id/terzo-tempo` con selettore stagione, votazioni in corso con conto alla rovescia, premiazione animata del premio più scelto (statica con le animazioni ridotte), statistiche, preferenze e storico; nella scheda della partita la scadenza del voto è ora ben visibile con il conto alla rovescia. Risultati in tempo reale già presenti (`voting:updated`).
+- Corretto un difetto grafico: le barre `.progress` fuori dalle righe delle classifiche non si vedevano (elemento `inline`).
+- Test: 221 backend verdi (8 nuovi in `thirdHalf.test.js`).

@@ -5,6 +5,7 @@ const nicknameService = require('../services/nicknameService');
 const dashboardService = require('../services/dashboardService');
 const activityService = require('../services/activityService');
 const seasonService = require('../services/seasonService');
+const thirdHalfService = require('../services/thirdHalfService');
 const cashboxService = require('../services/cashboxService');
 const clubService = require('../services/clubService');
 const hallOfFameService = require('../services/hallOfFameService');
@@ -70,7 +71,10 @@ const createEntry = async (req, res) => res.status(201).json({ entry: await cash
 const verifyEntry = async (req, res) => res.json({ entry: await cashboxService.verify(req.group, req.user, req.params.entryId) });
 const cancelEntry = async (req, res) => res.json({ entry: await cashboxService.cancel(req.group, req.user, req.params.entryId, req.body.reason) });
 
+const thirdHalf = async (req, res) => res.json({ thirdHalf: await thirdHalfService.forGroup(req.group, req.validQuery) });
+
 module.exports = {
+  thirdHalf,
   cashbox,
   ledger,
   createEntry,

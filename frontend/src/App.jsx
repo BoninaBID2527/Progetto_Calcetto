@@ -23,6 +23,7 @@ import HallOfFame from './pages/HallOfFame';
 import Club from './pages/Club';
 import Calendar from './pages/Calendar';
 import Cashbox from './pages/Cashbox';
+import ThirdHalf from './pages/ThirdHalf';
 import GroupChat from './pages/GroupChat';
 import GroupMembers from './pages/GroupMembers';
 import Notifications from './pages/Notifications';
@@ -87,6 +88,7 @@ export default function App() {
           <Route path="rivalita" element={<Rivalries />} />
           <Route path="rivalita/:userId" element={<Versus />} />
           <Route path="classifiche" element={<GroupRankings />} />
+          <Route path="terzo-tempo" element={<ThirdHalf />} />
           <Route path="cassa" element={<Cashbox />} />
           <Route path="club" element={<Club />} />
           <Route path="hall-of-fame" element={<HallOfFame />} />

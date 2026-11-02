@@ -931,6 +931,7 @@
 }
 
 .progress {
+  display: block;
   height: 8px;
   border-radius: var(--radius-pill);
   background: var(--c-surface-3);
