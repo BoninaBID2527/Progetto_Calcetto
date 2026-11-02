@@ -19,6 +19,7 @@ import Versus from './pages/Versus';
 import NewMatch from './pages/NewMatch';
 import MatchDetail from './pages/MatchDetail';
 import GroupRankings from './pages/GroupRankings';
+import HallOfFame from './pages/HallOfFame';
 import GroupChat from './pages/GroupChat';
 import GroupMembers from './pages/GroupMembers';
 import Notifications from './pages/Notifications';
@@ -82,6 +83,7 @@ export default function App() {
           <Route path="rivalita" element={<Rivalries />} />
           <Route path="rivalita/:userId" element={<Versus />} />
           <Route path="classifiche" element={<GroupRankings />} />
+          <Route path="hall-of-fame" element={<HallOfFame />} />
           <Route path="chat" element={<GroupChat />} />
           <Route path="membri" element={<GroupMembers />} />
         </Route>

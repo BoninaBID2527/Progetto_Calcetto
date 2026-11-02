@@ -56,7 +56,7 @@ const ratings = z
   .strict();
 const prizeVote = z.object({ option: z.string().trim().min(1).max(40) }).strict();
 
-const rankings = z.object({ period: z.enum(['mese', 'stagione', 'sempre']).default('sempre') });
+const rankings = z.object({ period: z.enum(['mese', 'stagione', 'sempre']).default('sempre'), season: z.string().trim().min(1).max(40).optional() });
 const cardScope = z.object({ scope: z.enum(['gruppo', 'carriera']).default('gruppo') });
 
 module.exports = {

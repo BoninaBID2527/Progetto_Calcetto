@@ -183,6 +183,108 @@ function InviteCard({ group, isAdmin }) {
   );
 }
 
+const MONTH_NAMES = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+
+/** Modalità di stagione, mese di inizio e stagioni personalizzate. Lo storico non si cancella mai. */
+function SeasonSettings({ group, settings, update }) {
+  const toast = useToast();
+  const season = settings.season || { mode: 'annuale', startMonth: 9 };
+  const { data, reload } = useResource(() => api(`/groups/${group.id}/seasons`), [group.id, season.mode]);
+  const [form, setForm] = useState({ name: '', startsAt: '', endsAt: '' });
+  const [error, setError] = useState(null);
+
+  const add = async (e) => {
+    e.preventDefault();
+    setError(null);
+    try {
+      await api(`/groups/${group.id}/seasons`, {
+        method: 'POST',
+        body: { name: form.name, startsAt: new Date(`${form.startsAt}T00:00:00`).toISOString(), endsAt: new Date(`${form.endsAt}T00:00:00`).toISOString() },
+      });
+      setForm({ name: '', startsAt: '', endsAt: '' });
+      toast.success('Stagione creata.');
+      reload();
+    } catch (err) {
+      setError(err);
+    }
+  };
+  const remove = async (s) => {
+    try {
+      await api(`/groups/${group.id}/seasons/${s.id}`, { method: 'DELETE' });
+      toast.success('Stagione eliminata: le partite restano nello storico.');
+      reload();
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  return (
+    <fieldset className="field stack" style={{ border: 0, padding: 0, margin: 0 }}>
+      <legend className="label">Stagioni</legend>
+      <Segmented
+        label="Durata della stagione"
+        value={season.mode}
+        onChange={(mode) => update({ season: { ...season, mode } })}
+        options={[
+          { value: 'annuale', label: 'Annuale' },
+          { value: 'trimestrale', label: 'Trimestrale' },
+          { value: 'mensile', label: 'Mensile' },
+          { value: 'personalizzata', label: 'Personalizzata' },
+        ]}
+      />
+      {season.mode === 'annuale' && (
+        <FormField label="Mese di inizio della stagione">
+          {(p) => (
+            <select {...p} className="select" value={season.startMonth} onChange={(e) => update({ season: { ...season, startMonth: Number(e.target.value) } })}>
+              {MONTH_NAMES.map((m, i) => (
+                <option key={m} value={i + 1}>
+                  {m}
+                </option>
+              ))}
+            </select>
+          )}
+        </FormField>
+      )}
+      <p className="muted">Cambiare modalità non cancella nulla: le partite restano e ogni stagione resta consultabile nelle classifiche.</p>
+      {season.mode === 'personalizzata' && (
+        <form className="stack" onSubmit={add} aria-label="Nuova stagione personalizzata">
+          <FormAlert>{error?.message}</FormAlert>
+          <div className="row" style={{ flexWrap: 'wrap' }}>
+            <FormField label="Nome" error={error?.fields?.name}>
+              {(p) => <input {...p} className="input" required minLength={2} maxLength={40} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />}
+            </FormField>
+            <FormField label="Inizio" error={error?.fields?.startsAt}>
+              {(p) => <input {...p} className="input" type="date" required value={form.startsAt} onChange={(e) => setForm({ ...form, startsAt: e.target.value })} />}
+            </FormField>
+            <FormField label="Fine (esclusa)" error={error?.fields?.endsAt}>
+              {(p) => <input {...p} className="input" type="date" required value={form.endsAt} onChange={(e) => setForm({ ...form, endsAt: e.target.value })} />}
+            </FormField>
+          </div>
+          <button type="submit" className="btn btn-secondary">
+            <Icon name="plus" /> Aggiungi stagione
+          </button>
+          <ul className="list">
+            {(data?.seasons || []).map((s) => (
+              <li key={s.key} className="list-item">
+                <span className="grow">
+                  <span className="player-name">{s.label}</span>
+                  <span className="player-sub">
+                    {new Date(s.start).toLocaleDateString('it-IT')} – {new Date(s.end).toLocaleDateString('it-IT')}
+                    {s.current ? ' · in corso' : ''}
+                  </span>
+                </span>
+                <button type="button" className="btn btn-ghost" onClick={() => remove(s)} aria-label={`Elimina la stagione ${s.label}`}>
+                  <Icon name="trash" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </form>
+      )}
+    </fieldset>
+  );
+}
+
 function SettingsCard({ group }) {
   const toast = useToast();
   const { refreshGroups } = useAppData();
@@ -243,6 +345,7 @@ function SettingsCard({ group }) {
           </select>
         )}
       </FormField>
+      <SeasonSettings group={group} settings={settings} update={update} />
       <div className="field">
         <span className="label">Chi perde offre il primo giro</span>
         <Segmented

@@ -55,14 +55,13 @@ function overallOf(rows, role) {
 }
 
 /** Edizioni speciali con il motivo, calcolate solo dai dati del gruppo. */
-function editionsFor(group, uid, { matches, rows: allRows }, ov, members) {
+function editionsFor(group, uid, { matches, rows: allRows }, ov, members, { season, prev } = {}) {
   const mine = allRows.filter((r) => r.user === uid);
   const stats = statsEngine.summarize(mine);
   const unlocked = {};
 
   if (stats.played >= 50 || stats.mvp >= 10) unlocked.leggenda = `${stats.played} presenze e ${stats.mvp} MVP nel gruppo.`;
 
-  const prev = seasonService.previousSeason(group);
   if (prev) {
     const prevMatches = matches.filter((m) => inRange(m.startsAt, prev));
     if (prevMatches.length) {
@@ -82,11 +81,10 @@ function editionsFor(group, uid, { matches, rows: allRows }, ov, members) {
   const lastWithMvp = [...matches].reverse().find((m) => m.mvp.length);
   if (lastWithMvp?.mvp.includes(uid)) unlocked.mvp = `MVP della partita del ${new Date(lastWithMvp.startsAt).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' })}.`;
 
-  const season = seasonService.seasonAt(group);
   const goalsBy = new Map();
   for (const r of allRows.filter((x) => inRange(x.startsAt, season))) goalsBy.set(r.user, (goalsBy.get(r.user) || 0) + r.goals);
   const top = Math.max(0, ...goalsBy.values());
-  if (top >= 3 && goalsBy.get(uid) === top) unlocked.bomber = `${top} gol nella ${season.label.toLowerCase()}: nessuno ne ha fatti di più.`;
+  if (season && top >= 3 && goalsBy.get(uid) === top) unlocked.bomber = `${top} gol nella ${season.label.toLowerCase()}: nessuno ne ha fatti di più.`;
 
   const lastRated = mine.map((r) => r.avgRating).filter((v) => v !== null).slice(-3);
   if (lastRated.length === 3) {
@@ -135,16 +133,17 @@ async function card(group, targetId, viewer, scope = 'gruppo') {
     rows.sort((a, b) => new Date(a.startsAt) - new Date(b.startsAt));
   }
   const ov = overallOf(rows, user.preferredRole);
-  const season = seasonService.seasonAt(group);
+  const season = await seasonService.current(group);
+  const prev = scope === 'gruppo' ? await seasonService.previous(group) : null;
   const members = group.members.map((m) => ({ userId: String(m.user), joinedAt: m.joinedAt }));
-  const editions = scope === 'gruppo' ? editionsFor(group, uid, data, ov, members) : { current: { ...EDITIONS[5], unlocked: true }, list: [] };
+  const editions = scope === 'gruppo' ? editionsFor(group, uid, data, ov, members, { season, prev }) : { current: { ...EDITIONS[5], unlocked: true }, list: [] };
 
   return {
     user: publicUser(user, await nicknameFor(group._id, uid)),
     scope,
     context: scope === 'gruppo' ? `${group.name}` : `Carriera · ${groupsCount} ${groupsCount === 1 ? 'gruppo' : 'gruppi'}`,
     stats: publicStats(statsEngine.summarize(rows)),
-    season: { label: season.label, stats: publicStats(statsEngine.summarize(rows.filter((r) => inRange(r.startsAt, season)))) },
+    season: { label: season ? season.label : 'Fuori stagione', stats: publicStats(statsEngine.summarize(rows.filter((r) => inRange(r.startsAt, season)))) },
     ...publicOverall(ov),
     edition: editions.current,
     editions: editions.list,
@@ -214,8 +213,10 @@ async function progression(group, targetId) {
   const bestRated = rows.filter((r) => r.avgRating !== null).reduce((b, r) => (!b || r.avgRating > b.avgRating ? r : b), null);
 
   const bySeason = new Map();
+  const custom = await seasonService.customFor(group);
   for (const r of rows) {
-    const season = seasonService.seasonAt(group, r.startsAt);
+    const season = seasonService.seasonAt(group, r.startsAt, custom);
+    if (!season) continue; // partita fuori da ogni stagione personalizzata
     if (!bySeason.has(season.key)) bySeason.set(season.key, { key: season.key, label: season.label, start: season.start, rows: [] });
     bySeason.get(season.key).rows.push(r);
   }

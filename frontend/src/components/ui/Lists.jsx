@@ -40,11 +40,26 @@ export function NotificationItem({ notification: n, onOpen }) {
   );
 }
 
+/** Variazione rispetto alla stagione precedente; assente se non c'è un confronto. */
+function PositionChange({ now, before }) {
+  if (before === null || before === undefined) return null;
+  const diff = before - now;
+  if (diff === 0) return <span className="pos-change same" role="img" aria-label="Stessa posizione della stagione precedente">=</span>;
+  const label = diff > 0 ? `Sale di ${diff} ${diff === 1 ? 'posizione' : 'posizioni'} rispetto alla stagione precedente` : `Scende di ${-diff} ${diff === -1 ? 'posizione' : 'posizioni'} rispetto alla stagione precedente`;
+  return (
+    <span className={`pos-change ${diff > 0 ? 'up' : 'down'}`} role="img" aria-label={label}>
+      {diff > 0 ? '▲' : '▼'}
+      {Math.abs(diff)}
+    </span>
+  );
+}
+
 export function LeaderboardRow({ entry: e, isMe, to }) {
   const body = (
     <>
       <span className="pos" aria-label={`${e.position}° posto`}>
         {e.position}
+        <PositionChange now={e.position} before={e.previousPosition} />
       </span>
       <span className="body">
         <span className="player">

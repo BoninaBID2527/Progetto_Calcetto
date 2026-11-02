@@ -8,7 +8,7 @@
  * personalizzata (stagioni create dall'admin).
  */
 const { Season, Match } = require('../models');
-const { conflict, notFound, unprocessable } = require('../utils/AppError');
+const { notFound, unprocessable } = require('../utils/AppError');
 
 const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
 
@@ -99,4 +99,4 @@ async function remove(group, seasonId) {
   if (!res.deletedCount) throw notFound('Stagione non trovata.');
 }
 
-module.exports = { seasonAt, previousSeason, settingsOf, list, byKey, current, previous, create, remove, conflict };
+module.exports = { seasonAt, previousSeason, settingsOf, list, byKey, current, previous, create, remove, customFor };

@@ -25,6 +25,6 @@ async function report(req, res) {
 }
 
 const matchday = async (req, res) => res.json({ matchday: await matchdayService.forMatch(req.match) });
-const rankings = async (req, res) => res.json(await rankingService.groupRankings(req.group, req.validQuery.period));
+const rankings = async (req, res) => res.json(await rankingService.groupRankings(req.group, req.validQuery));
 
 module.exports = { matchday, balance, setTeams, setResult, votingState, mvpVote, ratings, prizeVote, closeVoting, report, rankings };

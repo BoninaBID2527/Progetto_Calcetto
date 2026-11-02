@@ -145,7 +145,8 @@ describe('Calcolo delle classifiche (funzione pura)', () => {
   test('nessuna partita: classifiche vuote senza errori', () => {
     const { rankings } = computeRankings({ matches: [], ratings: [], members: members('ale'), minMatches: 3 });
     expect(rankings.every((r) => r.entries.length === 0)).toBe(true);
-    expect(rankings.map((r) => r.key)).toEqual(['forti', 'mvp', 'vincenti', 'sfortunati', 'presenti', 'bomber']);
+    expect(rankings.map((r) => r.key)).toEqual(['forti', 'mvp', 'vincenti', 'sfortunati', 'presenti', 'bomber', 'forma', 'media_gol', 'difensore', 'portiere', 'rendimento', 'crescita']);
+    expect(rankings.every((r) => r.available === false && r.unavailableReason)).toBe(true);
   });
 
   test('periodi: mese di calendario e stagione dal 1° settembre', () => {
@@ -186,11 +187,11 @@ describe('Classifiche via API', () => {
     await Match.create(make(50, 9, 0, { status: 'annullata' }));
   });
 
-  test('restituisce le sei classifiche con note esplicative e utenti con soprannome', async () => {
+  test('restituisce le dodici classifiche con note esplicative e utenti con soprannome', async () => {
     const res = await api().get(`/api/groups/${ctx.group.id}/rankings?period=sempre`).set(ctx.members[0].auth);
     expect(res.status).toBe(200);
     expect(res.body.totalMatches).toBe(4);
-    expect(res.body.rankings).toHaveLength(6);
+    expect(res.body.rankings).toHaveLength(12);
     expect(res.body.rankings.every((r) => r.note.length > 20)).toBe(true);
     const mvp = res.body.rankings.find((r) => r.key === 'mvp');
     expect(mvp.entries[0]).toMatchObject({ value: 4, position: 1, user: { id: ctx.admin.user.id, name: 'Admin' } });

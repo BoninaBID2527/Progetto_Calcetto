@@ -4,6 +4,8 @@ const groupService = require('../services/groupService');
 const nicknameService = require('../services/nicknameService');
 const dashboardService = require('../services/dashboardService');
 const activityService = require('../services/activityService');
+const seasonService = require('../services/seasonService');
+const hallOfFameService = require('../services/hallOfFameService');
 
 const list = async (req, res) => res.json({ groups: await groupService.listMine(req.user) });
 const create = async (req, res) => res.status(201).json({ group: await groupService.create(req.user, req.body) });
@@ -43,7 +45,24 @@ const removeNickname = async (req, res) =>
 const dashboard = async (req, res) => res.json({ dashboard: await dashboardService.forUser(req.group, req.user) });
 const activity = async (req, res) => res.json(await activityService.list(req.group._id, req.validQuery));
 
+const listSeasons = async (req, res) => res.json({ mode: seasonService.settingsOf(req.group), seasons: await seasonService.list(req.group) });
+async function createSeason(req, res, next) {
+  if (seasonService.settingsOf(req.group).mode !== 'personalizzata') {
+    return next(require('../utils/AppError').unprocessable('Le stagioni si creano a mano solo nella modalità personalizzata.'));
+  }
+  return res.status(201).json({ season: await seasonService.create(req.group, req.body) });
+}
+const removeSeason = async (req, res) => {
+  await seasonService.remove(req.group, req.params.seasonId);
+  res.status(204).end();
+};
+const hallOfFame = async (req, res) => res.json({ hallOfFame: await hallOfFameService.forGroup(req.group) });
+
 module.exports = {
+  listSeasons,
+  createSeason,
+  removeSeason,
+  hallOfFame,
   dashboard,
   activity,
   list,

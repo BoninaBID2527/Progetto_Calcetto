@@ -15,7 +15,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M6 | BONCARD e BONRATING (attributi, overall, edizioni, progressione, esportazione PNG) | ✅ |
 | M7 | MATCHDAY e formazioni, Bilancia migliorato, locandina esportabile | ✅ |
 | M8 | Rivalità | ✅ |
-| M9 | Stagioni, nuove classifiche, Hall of Fame | ⏳ |
+| M9 | Stagioni, nuove classifiche, Hall of Fame | ✅ |
 | M10 | Premi partita e achievement | ⏳ |
 | M11 | Club personalizzati (stemma, colori, maglie, copertina) | ⏳ |
 | M12 | Calendario intelligente e partite ricorrenti | ⏳ |
@@ -173,3 +173,11 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Rotte `GET/POST /groups/:id/rivalries`, `GET /groups/:id/rivalries/:userId?with=`, `POST /rivalries/:rid/accept|decline`, `DELETE /rivalries/:rid`.
 - Frontend: pagina Rivalità (proposte da accettare, dichiarate, naturali, sfida un compagno con anteprima del testa a testa) e schermata VS con ingresso animato, record, confronto a barre, partite insieme, serie in corso, ultimi scontri, avviso quando i confronti sono meno di 3.
 - Test: 151 backend verdi (4 nuovi), screenshot 390/1280 senza overflow.
+
+### M9 — Stagioni, nuove classifiche, Hall of Fame (✅)
+- Stagioni: `Group.settings.season` (annuale con mese di inizio, trimestrale, mensile, personalizzata) e modello `Season` per le personalizzate (sovrapposizioni rifiutate con 422). Nessuna partita viene toccata cambiando modalità: la stagione è solo una finestra sulle partite. Rotte `GET/POST /groups/:id/seasons` (POST solo admin e solo in modalità personalizzata) e `DELETE /groups/:id/seasons/:sid`.
+- `playerService` (BONCARD, edizioni, progressione) usa la stagione configurata; fuori da ogni stagione personalizzata mostra "Fuori stagione" senza errori.
+- Classifiche: 12 in tutto. Le 6 storiche sono invariate; nuove `forma`, `media_gol`, `difensore`, `portiere`, `rendimento`, `crescita`, ognuna con requisito esplicito e stato `available: false` + motivo se nessuno lo soddisfa. `GET /groups/:id/rankings?period=mese|stagione|sempre` oppure `?season=<chiave>`; la risposta include `season`, `previous` e, per ogni voce, `previousPosition` (confronto con la stagione precedente). La home continua a mostrare le 6 storiche.
+- Hall of Fame (`GET /groups/:id/hall-of-fame`): vincitori (più forti, MVP, bomber, più vincenti) di ogni stagione chiusa con partite, record assoluti (più gol in una partita, vittoria più larga, serie di vittorie, presenze, MVP, capocannoniere, miglior voto medio con minimo partite), più premiati (MVP + premi di partita + titoli stagionali). Dove i dati non bastano: `available: false`, mai valori inventati.
+- Frontend: selettore periodo (sempre / mese / stagione corrente / stagioni passate), frecce di variazione accessibili, 12 schede con requisito e motivo dell'indisponibilità, pagina Hall of Fame (`/gruppi/:id/hall-of-fame`, voce nel menu), impostazioni admin di stagione (modalità, mese di inizio, stagioni personalizzate).
+- Test: 164 backend verdi (13 nuovi in `seasons.test.js`: nuove classifiche, modalità, sovrapposizioni, permessi, confronto con la precedente, Hall of Fame vuota e piena, accesso dei non membri). Build ok, verifica visiva a 1280 px senza errori in console.

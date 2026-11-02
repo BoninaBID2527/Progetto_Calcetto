@@ -1152,3 +1152,76 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
+
+/* Variazione di posizione rispetto alla stagione precedente */
+.rank-row .pos {
+  display: grid;
+  justify-items: center;
+  line-height: 1.1;
+}
+.pos-change {
+  font-family: var(--font-ui, inherit);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--c-text-2);
+}
+.pos-change.up {
+  color: var(--c-primary-text);
+}
+.pos-change.down {
+  color: var(--c-orange-text);
+}
+
+/* Hall of Fame */
+.hof-season {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--c-border);
+}
+.hof-season:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+.hof-season-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+}
+.hof-winners {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.hof-winner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 12px;
+  border-radius: var(--radius-m);
+  background: var(--c-surface-2);
+}
+.hof-winner > svg {
+  color: var(--c-gold-text);
+}
+.hof-holders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.hof-holder {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+}
+.hof-holder:hover {
+  text-decoration: underline;
+}

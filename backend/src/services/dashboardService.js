@@ -27,8 +27,9 @@ async function forUser(group, user) {
   const rows = statsEngine.playerRows(matches, ratings).filter((r) => r.user === uid);
   const summary = statsEngine.summarize(rows);
 
-  const season = await rankingService.groupRankings(group, 'stagione');
-  const positions = season.rankings.map((r) => {
+  const season = await rankingService.groupRankings(group, { period: 'stagione' });
+  const CORE = ['forti', 'mvp', 'vincenti', 'sfortunati', 'presenti', 'bomber']; // la home mostra le classifiche storiche
+  const positions = season.rankings.filter((r) => CORE.includes(r.key)).map((r) => {
     const entry = r.entries.find((e) => e.user.id === uid);
     return { key: r.key, title: r.title, position: entry?.position || null, value: entry?.display || null, total: r.entries.length, minMatches: r.minMatches };
   });

@@ -9,38 +9,11 @@ Questo file serve a riprendere il lavoro in una nuova chat **esattamente da dove
 
 ## Dove siamo
 
-- Milestone completate e committate: **M0-M8** (audit, architettura, design system NIGHT LEAGUE, dashboard, BONCALL, PWA e Web Push, BONCARD/BONRATING, MATCHDAY, rivalità).
-- Milestone in corso: **M9 — Stagioni, nuove classifiche, Hall of Fame**, iniziata e salvata nel commit "wip(stagioni)".
-- Da fare dopo: M10-M17 (vedi sotto).
-- Stato dei test al momento dell'interruzione: **151 test backend verdi**, **13 test end-to-end verdi** (ultima esecuzione completa in M5; dopo M5 sono stati eseguiti i test backend e controlli visivi, non di nuovo l'intera suite e2e).
+- Milestone completate e committate: **M0-M9**.
+- Prossima: **M10** (premi partita e achievement).
+- Stato dei test: **164 test backend verdi**; e2e ultima esecuzione completa in M5 (da rieseguire in M16).
 
-## M9: cosa è già fatto (nel commit wip)
-
-- `backend/src/models/Season.js`: stagioni personalizzate `{ group, name, startsAt, endsAt }`.
-- `Group.settings.season { mode: annuale|trimestrale|mensile|personalizzata, startMonth: 1-12 }` con default `annuale`, mese 9 (stesso comportamento della V1); validatore in `groupValidators.updateGroup.settings.season`; `groupService.update` lo salva e `summary` lo restituisce.
-- `groupValidators.createSeason` (nome, inizio, fine, fine dopo l'inizio).
-- `backend/src/services/seasonService.js` riscritto: `seasonAt`, `previousSeason` (sincrone, come prima), più `list(group)` (tutte le stagioni dalla prima partita a oggi, più recente prima, con `current` e `closed`), `byKey(group, key)` (stagione + precedente), `current(group)`, `previous(group)` (asincrone, gestiscono la modalità personalizzata), `create` (rifiuta sovrapposizioni con 422), `remove`.
-
-## M9: cosa resta, in ordine
-
-1. **`playerService.js`**: oggi usa `seasonService.seasonAt(group)` e `previousSeason(group)` in modo sincrono, che in modalità "personalizzata" restituiscono `null` e farebbero cadere `card()` (`season.label`). Sostituire con `await seasonService.current(group)` / `await seasonService.previous(group)`, gestire `season === null` (etichetta "Fuori stagione") e, in `progression`, raggruppare le righe con le stagioni personalizzate caricate una volta sola.
-2. **`rankingService.js`**: lasciare identiche le 6 classifiche esistenti e aggiungerne 6 in `DEFINITIONS`, ognuna con requisito esplicito e stato "non disponibile" se nessuno lo soddisfa:
-   - `forma`: media degli ultimi 5 voti di partita (almeno 3 partite valutate);
-   - `media_gol`: gol ÷ partite con marcatori inseriti (almeno il minimo partite *con marcatori*);
-   - `difensore`: attributo DIF bayesiano (stessa formula di `playerRating`), almeno 3 valutazioni DIF;
-   - `portiere`: voto generale bayesiano dei giocatori con ruolo portiere, almeno 3 voti;
-   - `rendimento`: voto medio nel periodo, almeno 3 voti;
-   - `crescita`: voto medio del periodo meno quello della stagione precedente (almeno 3 voti in entrambe).
-   `computeRankings` deve ricevere anche i ruoli (`roles: { userId: ruolo }`) e le medie precedenti (`previousAvg`), con default vuoti per non rompere chi la chiama già (`playerService.editionsFor`).
-   `groupRankings(group, { period, season }, now)`: con `season` usa `seasonService.byKey`; con `period: 'stagione'` usa la stagione corrente configurata del gruppo (non più il 1° settembre fisso); calcola le posizioni della stagione precedente e aggiunge a ogni voce `previousPosition`. Restituisce anche `season` e `previous` (`{ key, label }`). Aggiornare le chiamate: `postMatchController.rankings` (validatore `rankings` con `season` facoltativo) e `dashboardService` (`groupRankings(group, { period: 'stagione' })`).
-   In `tests/rankings.test.js` il test "nessuna partita" controlla l'elenco esatto delle 6 chiavi: estendere l'elenco con le 6 nuove (non togliere test).
-3. **Hall of Fame**: `services/hallOfFameService.js` + `GET /groups/:id/hall-of-fame`: vincitori di ogni stagione chiusa (I più forti, MVP, Bomber, I più vincenti), record assoluti (più gol in una partita, vittoria più larga, serie di vittorie più lunga, più presenze, più MVP, capocannoniere di sempre, miglior voto medio con minimo partite), giocatori più premiati. Tutto dai dati reali via `statsEngine`.
-4. **Stagioni via API**: `GET /groups/:id/seasons`, `POST /groups/:id/seasons` (admin, solo in modalità personalizzata), `DELETE /groups/:id/seasons/:sid` (admin).
-5. **Test backend** per stagioni (modalità, sovrapposizioni, permessi), nuove classifiche (requisiti, parità, non disponibili), confronto con la stagione precedente, Hall of Fame.
-6. **Frontend**: in `GroupRankings.jsx` sostituire il selettore del periodo con una scelta "Sempre / Questo mese / stagione corrente / stagioni passate" (da `GET /seasons`), frecce di variazione rispetto alla stagione precedente, schede per le 12 classifiche con il motivo quando una non è disponibile; nuova pagina **Hall of Fame** (`/gruppi/:id/hall-of-fame`, voce in `layouts/navigation.js`); nelle impostazioni admin di `GroupMembers.jsx` modalità di stagione, mese di inizio e gestione delle stagioni personalizzate.
-7. Aggiornare `docs/ROADMAP_V2.md` (riga M9 ✅ e registro), commit `feat: stagioni, nuove classifiche e Hall of Fame`.
-
-## Milestone successive (dettagli in `docs/PROMPT_V2.md`, fasi 9-19)
+## Milestone successive (il testo completo dei requisiti, `PROMPT_V2.md`, è stato rimosso dal repository su richiesta: se serve, va riconsegnato dall'utente)
 
 - **M10** Premi partita (miglior portiere, difensore, bomber della serata automatico dai marcatori, sorpresa, premio ironico; attivabili dall'admin; votazione o assegnazione dell'organizzatore) e achievement idempotenti (prima partita, 10/25/50 presenze, primo gol, 10/25 gol, primo MVP, 5 MVP, serie di vittorie, fedeltà) con premiazioni animate. Modelli previsti in ARCHITETTURA: `AwardVote`, `Achievement`, `Match.awards`, `Match.awardWinners` (il motore statistico legge già `awardWinners`).
 - **M11** Club: stemma e copertina caricati con `multer` (tipo verificato dai primi byte, PNG/JPEG/WebP, niente SVG, limiti di dimensione, salvati come data URL), colore secondario, motto, maglie chiara/scura, statistiche del gruppo, fallback grafici.

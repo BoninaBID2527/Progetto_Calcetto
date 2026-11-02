@@ -54,6 +54,10 @@ router.get('/:groupId/players/:userId/progression', inGroup, validIds('userId'),
 router.get('/:groupId/rivalries', inGroup, rivalryCtrl.list);
 router.post('/:groupId/rivalries', inGroup, validate({ body: gv.proposeRivalry }), rivalryCtrl.propose);
 router.get('/:groupId/rivalries/:userId', inGroup, validIds('userId'), validate({ query: gv.versusQuery }), rivalryCtrl.detail);
+router.get('/:groupId/seasons', inGroup, ctrl.listSeasons);
+router.post('/:groupId/seasons', admin, validate({ body: gv.createSeason }), ctrl.createSeason);
+router.delete('/:groupId/seasons/:seasonId', admin, validIds('seasonId'), ctrl.removeSeason);
+router.get('/:groupId/hall-of-fame', inGroup, ctrl.hallOfFame);
 router.get('/:groupId/rankings', inGroup, validate({ query: mv.rankings }), postCtrl.rankings);
 
 router.get('/:groupId/messages', inGroup, validate({ query: cv.listMessages }), chatCtrl.list);
