@@ -21,7 +21,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M12 | Calendario intelligente e partite ricorrenti | ✅ |
 | M13 | Cassa del gruppo (registro dichiarato/verificato) | ✅ |
 | M14 | Terzo tempo evoluto | ✅ |
-| M15 | BONWRAPPED | ⏳ |
+| M15 | BONWRAPPED | ✅ |
 | M16 | Revisione schermate, test e2e, accessibilità, responsive | ⏳ |
 | M17 | Documentazione e consegna | ⏳ |
 
@@ -223,3 +223,10 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Frontend: pagina `/gruppi/:id/terzo-tempo` con selettore stagione, votazioni in corso con conto alla rovescia, premiazione animata del premio più scelto (statica con le animazioni ridotte), statistiche, preferenze e storico; nella scheda della partita la scadenza del voto è ora ben visibile con il conto alla rovescia. Risultati in tempo reale già presenti (`voting:updated`).
 - Corretto un difetto grafico: le barre `.progress` fuori dalle righe delle classifiche non si vedevano (elemento `inline`).
 - Test: 221 backend verdi (8 nuovi in `thirdHalf.test.js`).
+
+### M15 — BONWRAPPED (✅)
+- `GET /groups/:id/wrapped?season=corrente|sempre|<chiave>&user=<id>` (`wrappedService`): riepilogo di un giocatore del gruppo (di default chi chiama; qualunque membro del gruppo può vedere quello di un compagno, perché le statistiche sono già visibili nel gruppo). Tutto dal motore statistico: partite ed esiti, gol (solo dove sono inseriti i marcatori, altrimenti `null`), MVP, voto medio, migliore partita, record, **momenti** (primo gol, tripletta, serie da almeno 3 vittorie, goleada da almeno 4 gol di scarto, MVP), avversario più incontrato e compagno più frequente (almeno 3 partite), premi di partita e traguardi del periodo, progressione (prima contro seconda metà delle partite valutate, solo con almeno 4 partite valutate), posizioni nelle classifiche del periodo.
+- **Nessun dato inventato:** una sezione senza dati sufficienti viene omessa; con meno di 3 partite l'API risponde `enough: false` con il motivo e il frontend mostra un messaggio invece di numeri. Fuori da ogni stagione personalizzata risponde allo stesso modo, senza errori.
+- Frontend: `/gruppi/:id/wrapped` con schermate in stile storie (frecce da tastiera, indicatore di avanzamento cliccabile, ingresso animato con Motion, statico con animazioni ridotte), scelta del periodo (stagione corrente, tutto, passate), "Condividi questa schermata" (menu di condivisione o download) e "Scarica tutte" come PNG verticali 1080×1920 con gli stessi dati; collegamento dal profilo giocatore (`?utente=`).
+- Test: 230 backend verdi (9 nuovi in `wrapped.test.js`: dati insufficienti, fuori stagione, riepilogo, momenti, rivalità con soglia, premi e traguardi, progressione, classifiche, permessi). Verificato nel browser anche il PNG esportato.
+- Non verificato: condivisione nativa su telefoni reali (nel browser di prova si usa il download).

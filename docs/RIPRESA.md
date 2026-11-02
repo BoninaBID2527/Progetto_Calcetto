@@ -9,9 +9,9 @@ Questo file serve a riprendere il lavoro in una nuova chat **esattamente da dove
 
 ## Dove siamo
 
-- Milestone completate e committate: **M0-M14**.
-- Prossima: **M15** (BONWRAPPED).
-- Stato dei test: **221 test backend verdi**; e2e ultima esecuzione completa in M5 (da rieseguire in M16).
+- Milestone completate e committate: **M0-M15**.
+- Prossima: **M16** (revisione, test, accessibilità, responsive, sicurezza).
+- Stato dei test: **230 test backend verdi**; e2e ultima esecuzione completa in M5 (da rieseguire in M16).
 
 ## Milestone successive (il testo completo dei requisiti, `PROMPT_V2.md`, è stato rimosso dal repository su richiesta: se serve, va riconsegnato dall'utente)
 

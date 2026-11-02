@@ -140,6 +140,9 @@ export default function PlayerProfile() {
           <Button variant="primary" icon="download" onClick={exportPng} loading={exporting}>
             Esporta in PNG
           </Button>
+          <Link to={`/gruppi/${group.id}/wrapped${self ? '' : `?utente=${userId}`}`} className="btn btn-secondary">
+            <Icon name="sparkles" /> BONWRAPPED
+          </Link>
         </div>
         <div className="stack">
           <Breakdown card={c} self={self} />

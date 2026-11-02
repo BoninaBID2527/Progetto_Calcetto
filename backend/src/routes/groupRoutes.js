@@ -66,6 +66,7 @@ router.delete('/:groupId/availability/:date', inGroup, calCtrl.clearAvailability
 router.get('/:groupId/seasons', inGroup, ctrl.listSeasons);
 router.post('/:groupId/seasons', admin, validate({ body: gv.createSeason }), ctrl.createSeason);
 router.delete('/:groupId/seasons/:seasonId', admin, validIds('seasonId'), ctrl.removeSeason);
+router.get('/:groupId/wrapped', inGroup, validate({ query: gv.wrappedQuery }), ctrl.wrapped);
 router.get('/:groupId/third-half', inGroup, validate({ query: gv.thirdHalfQuery }), ctrl.thirdHalf);
 router.get('/:groupId/cashbox', inGroup, ctrl.cashbox);
 router.get('/:groupId/ledger', inGroup, validate({ query: gv.ledgerQuery }), ctrl.ledger);
