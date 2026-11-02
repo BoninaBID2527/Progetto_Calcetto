@@ -34,3 +34,13 @@ Il prompt chiede di non fermarsi davanti alle ambiguità ma di scegliere la solu
 
 20. **Foto profilo:** l'immagine scelta viene ridimensionata nel browser a 256 px e salvata come data URL (massimo circa 150 KB). Si evita così un sistema di upload di file. Senza foto si vedono le iniziali su un colore ricavato dal nome.
 21. **Gruppo attivo:** la navigazione principale (Partite, Classifiche, Chat, Gruppo) si riferisce al gruppo scelto, che viene ricordato nel browser.
+22. **Voti 1-10 "ai compagni"** sono intesi come voti agli altri giocatori della partita, di entrambe le squadre: servono a valutare chiunque per il pulsante Bilancia.
+23. **Messaggi di sistema** con il nome reale e frasi neutre ("ci sarà", "entra dalla lista d'attesa") per non dover indovinare il genere di nessuno.
+24. **Uscita e sessione scaduta.** Dopo "Esci" si torna alla landing; se invece il token scade o viene revocato altrove, si va alla pagina di accesso e dopo il login si torna dove si era.
+25. **L'ultimo membro può lasciare il gruppo**, che resta vuoto ma non viene cancellato (niente cancellazioni automatiche di dati).
+
+## Accessibilità e test
+
+26. **Arancio del testo nel tema scuro:** l'accento `#FF8A3D` resta per sfondi e pulsanti, ma come colore del testo (soprannomi) uso `#FFA062`. axe-core aveva misurato 4,48:1 sulle righe evidenziate, sotto la soglia AA di 4,5:1.
+27. **Test end-to-end isolati:** Playwright avvia un proprio database (mongo-lite in memoria, oppure il MongoDB indicato in `E2E_MONGODB_URI`, che deve avere "test" nel nome), il backend sulla porta 4100 e il frontend sulla 5174. Così non toccano mai i dati di sviluppo.
+28. **Seed con date relative:** le partite sono generate rispetto al giorno in cui si lancia il seed, alle 21:00 ora italiana, così ci sono sempre partite future e una votazione ancora aperta.
