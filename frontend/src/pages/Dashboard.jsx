@@ -86,6 +86,7 @@ export default function Dashboard() {
   const quick = [
     canOrganize && { to: `${base}/nuova-partita`, icon: 'plus', label: 'Nuova partita', primary: true },
     canOrganize && { to: `${base}/boncall/nuova`, icon: 'boncall', label: 'Cerca giocatori' },
+    { to: `${base}/giocatori/${user.id}`, icon: 'card', label: 'La mia BONCARD' },
     { to: `${base}/classifiche`, icon: 'trophy', label: 'Classifiche' },
     { to: `${base}/partite`, icon: 'calendar', label: 'Tutte le partite' },
     { to: `${base}/membri`, icon: 'users', label: 'Il gruppo' },

@@ -42,6 +42,14 @@ const USERS = [
 // Forza "di base" usata solo per generare risultati e voti credibili.
 const SKILL = { marco: 7, luca: 8, andrea: 7.5, davide: 6.5, simone: 7.5, matteo: 8, stefano: 6, paolo: 6.5, federico: 7, alessandro: 5.5 };
 
+// Punti di forza per ruolo, usati solo per generare abilità credibili nel seed.
+const ROLE_BIAS = {
+  portiere: { dif: 1.5, fis: 1, tir: -2, dri: -1.5 },
+  difensore: { dif: 1.5, fis: 1, tir: -1, dri: -1 },
+  centrocampista: { pas: 1.5, dri: 0.5, dif: -0.5 },
+  attaccante: { tir: 1.5, vel: 1, dri: 0.5, dif: -1.5 },
+};
+
 function rng(seed) {
   let t = seed;
   return () => {
@@ -159,7 +167,16 @@ async function playedMatch(group, organizer, players, { daysAgo, field, votingOp
   for (const rater of players) {
     const others = players.filter((p) => p !== rater).sort(() => random() - 0.5).slice(0, 4);
     for (const ratee of others) {
-      ratingDocs.push({ match: match._id, group: group._id, rater: rater.user._id, ratee: ratee.user._id, score: clamp(Math.round(SKILL[ratee.key] + (random() - 0.5) * 2.5), 1, 10) });
+      const score = clamp(Math.round(SKILL[ratee.key] + (random() - 0.5) * 2.5), 1, 10);
+      const doc = { match: match._id, group: group._id, rater: rater.user._id, ratee: ratee.user._id, score };
+      // Circa metà dei voti include anche le abilità, coerenti con ruolo e forma (dati dimostrativi).
+      if (random() < 0.55) {
+        const bias = ROLE_BIAS[ratee.user.preferredRole] || {};
+        doc.attributes = Object.fromEntries(
+          ['vel', 'tir', 'pas', 'dri', 'dif', 'fis'].map((k) => [k, clamp(Math.round(SKILL[ratee.key] + (bias[k] || 0) + (random() - 0.5) * 2), 1, 10)])
+        );
+      }
+      ratingDocs.push(doc);
     }
   }
   await Rating.insertMany(ratingDocs);

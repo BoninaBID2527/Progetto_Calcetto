@@ -12,7 +12,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M3 | Dashboard "Spogliatoio" con hero MATCHDAY, azioni rapide, feed attività; restyling gruppi e partite | ✅ |
 | M4 | BONCALL: convocazioni, risposte atomiche, conversione idempotente, promemoria, notifiche in-app | ✅ |
 | M5 | PWA e Web Push (service worker, VAPID, subscription, preferenze, fasce silenziose) | ✅ |
-| M6 | BONCARD e BONRATING (attributi, overall, edizioni, progressione, esportazione PNG) | ⏳ |
+| M6 | BONCARD e BONRATING (attributi, overall, edizioni, progressione, esportazione PNG) | ✅ |
 | M7 | MATCHDAY e formazioni, Bilancia migliorato, locandina esportabile | ⏳ |
 | M8 | Rivalità | ⏳ |
 | M9 | Stagioni, nuove classifiche, Hall of Fame | ⏳ |
@@ -152,3 +152,12 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Frontend: `manifest.webmanifest`, icone PNG (any, maskable, apple-touch, badge), `sw.js` (pagine rete-prima con pagina offline, asset in cache, API e Socket.IO mai in cache, push con deep link, badge), `offline.html` che si ricarica da sola al ritorno della rete; impostazioni notifiche nel profilo (attivazione solo al clic, spiegazione per iOS e browser senza supporto, prova, categorie, fascia silenziosa, limite orario), installazione dell'app, badge sull'icona, riallineamento quando si torna all'app.
 - Test: 132 backend verdi (8 sulle push con trasporto finto); e2e `pwa.spec.js` (manifest e icone, service worker attivo, offline, nessuna API in cache, nessuna richiesta di permesso al caricamento, errore spiegato senza VAPID); suite e2e completa 13/13 verde, axe compreso.
 - **Non verificato:** consegna reale di una push. In questo ambiente non c'è nessun servizio push raggiungibile (FCM, Mozilla, Apple) e nessun dispositivo: la sottoscrizione di Chromium fallirebbe e l'invio è stato provato solo con un trasporto sostituito. Va verificato su un telefono vero con le chiavi VAPID configurate e il sito servito in HTTPS (o su localhost).
+
+### M6 — BONCARD e BONRATING (✅)
+- `services/playerRating.js` (funzioni pure: media bayesiana, attributi 10-99 con campioni e stato provvisorio, overall tecnico pesato per ruolo, forma limitata a ±1, overall 40-99), `services/seasonService.js` (stagione annuale/trimestrale/mensile; personalizzata in M9), `services/playerService.js` (carta nel contesto gruppo o carriera solo per sé, edizioni con requisiti e motivo, progressione con andamento, forma, record, stagioni).
+- `Rating.attributes` facoltativi (VEL, TIR, PAS, DRI, DIF, FIS) inviati con i voti 1-10; validazione 1-10.
+- Rotte `GET /groups/:id/players/:userId/card?scope=gruppo|carriera` e `/progression`.
+- Frontend: componente `PlayerCard` (sagoma originale, 6 edizioni con colori propri, reveal con Motion), esportazione PNG verticale 1080×1920 via canvas con foto o iniziali, `LineChart` SVG accessibile con tabella nascosta, pagina giocatore con trasparenza dell'overall, edizioni, statistiche con avvisi sui campioni piccoli, migliori prestazioni, record e confronto stagioni; voti per abilità con slider facoltativi nella votazione; link alla carta da membri, classifiche, dashboard e menu.
+- Seed: circa metà dei voti dimostrativi include le abilità.
+- Test: 143 backend verdi (11 nuovi: proprietà dell'algoritmo e API, permessi sulla carriera, edizioni). Build ok, screenshot 390/1280 senza overflow.
+- Non verificato: esportazione PNG su telefoni reali (testata solo la generazione del codice, non la condivisione nativa).

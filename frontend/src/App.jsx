@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import GroupPolls from './pages/GroupPolls';
 import NewPoll from './pages/NewPoll';
 import PollDetail from './pages/PollDetail';
+import PlayerProfile from './pages/PlayerProfile';
 import NewMatch from './pages/NewMatch';
 import MatchDetail from './pages/MatchDetail';
 import GroupRankings from './pages/GroupRankings';
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="nuova-partita" element={<NewMatch />} />
           <Route path="boncall" element={<GroupPolls />} />
           <Route path="boncall/nuova" element={<NewPoll />} />
+          <Route path="giocatori/:userId" element={<PlayerProfile />} />
           <Route path="classifiche" element={<GroupRankings />} />
           <Route path="chat" element={<GroupChat />} />
           <Route path="membri" element={<GroupMembers />} />

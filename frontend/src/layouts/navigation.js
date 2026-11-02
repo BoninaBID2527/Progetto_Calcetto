@@ -3,7 +3,7 @@
  * quando una milestone aggiunge una sezione, la si registra qui e compare
  * in barra laterale, barra in basso e menu "Altro".
  */
-export function navigationFor(group, { unreadNotifications = 0 } = {}) {
+export function navigationFor(group, { unreadNotifications = 0, userId } = {}) {
   const base = group ? `/gruppi/${group.id}` : '/gruppi';
   const inGroup = (path, fallback = '/gruppi') => (group ? `${base}${path}` : fallback);
   const canOrganize = group && (group.settings.organizers === 'tutti' || group.myRole === 'admin');
@@ -15,6 +15,7 @@ export function navigationFor(group, { unreadNotifications = 0 } = {}) {
     chat: { label: 'Chat', icon: 'chat', to: inGroup('/chat'), badge: group?.unreadCount || 0, badgeLabel: `${group?.unreadCount || 0} messaggi non letti` },
     membri: { label: 'Membri', icon: 'users', to: inGroup('/membri') },
     boncall: { label: 'Convocazioni', icon: 'boncall', to: inGroup('/boncall') },
+    boncard: { label: 'La mia BONCARD', icon: 'card', to: inGroup(`/giocatori/${userId}`) },
     notifiche: { label: 'Notifiche', icon: 'bell', to: '/notifiche', badge: unreadNotifications, badgeLabel: `${unreadNotifications} notifiche non lette` },
     profilo: { label: 'Profilo', icon: 'user', to: '/profilo' },
     gruppi: { label: 'Tutti i gruppi', icon: 'shield', to: '/gruppi', end: true },
@@ -31,11 +32,11 @@ export function navigationFor(group, { unreadNotifications = 0 } = {}) {
     home: group ? base : '/gruppi',
     create,
     bottom: [items.home, items.partite, items.chat],
-    more: [items.boncall, items.classifiche, items.membri, items.notifiche, items.profilo, items.gruppi],
+    more: [items.boncall, items.boncard, items.classifiche, items.membri, items.notifiche, items.profilo, items.gruppi],
     moreBadge: unreadNotifications,
     sections: [
       { title: group ? group.name : 'Gruppo', items: [items.home, items.partite, items.boncall, items.classifiche, items.chat, items.membri] },
-      { title: 'Tu', items: [items.notifiche, items.profilo, items.gruppi] },
+      { title: 'Tu', items: [...(group ? [items.boncard] : []), items.notifiche, items.profilo, items.gruppi] },
     ],
   };
 }

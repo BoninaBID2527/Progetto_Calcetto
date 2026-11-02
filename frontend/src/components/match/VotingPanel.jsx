@@ -4,18 +4,21 @@ import { Avatar, PlayerName } from '../Avatar';
 import { api } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
 import { formatDateTime } from '../../utils/format';
+import { ATTR_LABEL, ATTR_NAME } from '../player/PlayerCard';
 
 function Ratings({ match, voting, meId, onChange }) {
   const toast = useToast();
   const others = voting.players.filter((p) => p.id !== meId);
   const [scores, setScores] = useState(voting.ratings.mine);
+  const [attrs, setAttrs] = useState(voting.ratings.attributes || {});
+  const [open, setOpen] = useState(null);
   const [busy, setBusy] = useState(false);
-  const dirty = others.some((p) => scores[p.id] && scores[p.id] !== voting.ratings.mine[p.id]);
+  const dirty = others.some((p) => (scores[p.id] && scores[p.id] !== voting.ratings.mine[p.id]) || JSON.stringify(attrs[p.id] || {}) !== JSON.stringify(voting.ratings.attributes?.[p.id] || {}));
 
   const save = async () => {
     setBusy(true);
     try {
-      const ratings = Object.entries(scores).map(([userId, score]) => ({ userId, score }));
+      const ratings = Object.entries(scores).map(([userId, score]) => ({ userId, score, ...(attrs[userId] && Object.keys(attrs[userId]).length ? { attributes: attrs[userId] } : {}) }));
       const res = await api(`/matches/${match.id}/ratings`, { method: 'POST', body: { ratings } });
       onChange(res.voting);
       toast.success('Pagelle salvate. Restano anonime.');
@@ -41,6 +44,16 @@ function Ratings({ match, voting, meId, onChange }) {
                 <PlayerName user={p} />
               </span>
             </span>
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost"
+              aria-expanded={open === p.id}
+              disabled={!scores[p.id]}
+              onClick={() => setOpen(open === p.id ? null : p.id)}
+              title={scores[p.id] ? undefined : 'Prima dai il voto generale'}
+            >
+              <Icon name="sliders" /> Abilità
+            </button>
             <div className="rating-scale" role="radiogroup" aria-label={`Voto a ${p.name}`}>
               {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
                 <button key={n} type="button" role="radio" aria-checked={scores[p.id] === n} aria-label={`${n}`} onClick={() => setScores({ ...scores, [p.id]: n })}>
@@ -48,6 +61,30 @@ function Ratings({ match, voting, meId, onChange }) {
                 </button>
               ))}
             </div>
+            {open === p.id && (
+              <div className="attr-sliders">
+                <p className="muted" style={{ fontSize: 'var(--fs-sm)' }}>Facoltativo: valuta solo ciò che hai visto davvero. Alimenta gli attributi della sua BONCARD.</p>
+                {Object.entries(ATTR_LABEL).map(([k, label]) => {
+                  const v = attrs[p.id]?.[k];
+                  return (
+                    <label key={k} className="attr-slider">
+                      <span>
+                        {label} <small className="muted">{ATTR_NAME[k]}</small>
+                      </span>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        value={v || 5}
+                        aria-valuetext={v ? `${v} su 10` : 'non valutato'}
+                        onChange={(e) => setAttrs({ ...attrs, [p.id]: { ...(attrs[p.id] || {}), [k]: Number(e.target.value) } })}
+                      />
+                      <b className="tabular">{v || '—'}</b>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
           </div>
         ))}
       </div>

@@ -76,7 +76,7 @@ export default function GroupRankings() {
               {ranking.entries.length ? (
                 <>
                   <Podium entries={ranking.entries} />
-                  <RankRows entries={ranking.entries} meId={user.id} />
+                  <RankRows entries={ranking.entries} meId={user.id} linkFor={(e) => `/gruppi/${group.id}/giocatori/${e.user.id}`} />
                 </>
               ) : (
                 <EmptyState title="Classifica ancora vuota">

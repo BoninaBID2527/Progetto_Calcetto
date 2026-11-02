@@ -224,7 +224,7 @@ async function rate(match, user, ratings) {
   for (const r of ratings) {
     await Rating.updateOne(
       { match: match._id, rater: user._id, ratee: r.userId },
-      { $set: { score: r.score, group: match.group } },
+      { $set: { score: r.score, group: match.group, ...(r.attributes && Object.keys(r.attributes).length ? { attributes: r.attributes } : {}) } },
       { upsert: true }
     );
   }
@@ -270,6 +270,7 @@ async function state(matchId, user) {
     Rating.find({ match: matchId, rater: user._id }).lean(),
   ]);
   const myMvp = mvpVotes.find((v) => sameId(v.voter, user._id));
+  const myAttributes = Object.fromEntries(myRatings.filter((r) => r.attributes).map((r) => [String(r.ratee), r.attributes]));
   const myPrize = prizeVotes.find((v) => sameId(v.voter, user._id));
   const mvpClosed = Boolean(match.voting?.closed);
   const tally = new Map();
@@ -293,7 +294,7 @@ async function state(matchId, user) {
             : null,
         }
       : null,
-    ratings: { mine: Object.fromEntries(myRatings.map((r) => [String(r.ratee), r.score])) },
+    ratings: { mine: Object.fromEntries(myRatings.map((r) => [String(r.ratee), r.score])), attributes: myAttributes },
     prize: match.prizePoll
       ? {
           open: !match.prizePoll.closed,

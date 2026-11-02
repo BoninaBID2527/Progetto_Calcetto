@@ -80,7 +80,7 @@ export default function AppShell() {
 
   useEffect(() => setSheet(null), [location.pathname]);
 
-  const nav = navigationFor(activeGroup, { unreadNotifications: notifications.unread });
+  const nav = navigationFor(activeGroup, { unreadNotifications: notifications.unread, userId: user?.id });
 
   return (
     <div className="shell">

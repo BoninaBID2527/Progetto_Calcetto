@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import Icon from '../components/Icon';
 import { Player } from '../components/Avatar';
 import { CardSkeleton, ErrorState, FormAlert, FormField, Modal, Segmented, useConfirm } from '../components/ui';
@@ -399,6 +399,9 @@ export default function GroupMembers() {
                       <Player user={m.user} size={44} sub={[details, isAdmin ? m.user.email : null].filter(Boolean).join(' · ') || (self ? 'Sei tu' : null)} />
                       <span className="visually-hidden">: gestisci il soprannome</span>
                     </button>
+                    <Link to={`/gruppi/${group.id}/giocatori/${m.user.id}`} className="btn btn-sm" aria-label={`BONCARD di ${m.user.name}`}>
+                      <Icon name="card" /> BONCARD
+                    </Link>
                     {m.role === 'admin' && (
                       <span className="chip chip-yellow">
                         <Icon name="crown" /> Admin

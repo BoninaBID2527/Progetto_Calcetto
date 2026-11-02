@@ -1,0 +1,458 @@
+/* ---------------------------------------------------------------- BONCARD */
+.boncard {
+  --bc-bg-1: #24332a;
+  --bc-bg-2: #19251e;
+  --bc-accent: #c7ff36;
+  --bc-text: #f4f8f2;
+  --bc-muted: #b9c6be;
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto auto auto auto;
+  gap: 10px;
+  width: min(100%, 340px);
+  aspect-ratio: 5 / 7;
+  padding: 22px 22px 16px;
+  color: var(--bc-text);
+  background: linear-gradient(155deg, var(--bc-bg-1), var(--bc-bg-2) 70%);
+  clip-path: polygon(9% 0, 91% 0, 100% 6.5%, 100% 93.5%, 91% 100%, 9% 100%, 0 93.5%, 0 6.5%);
+  overflow: hidden;
+  isolation: isolate;
+  will-change: transform;
+}
+
+.boncard::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  clip-path: inherit;
+  border: 2px solid var(--bc-accent);
+  opacity: 0.6;
+}
+
+.boncard-stripe {
+  position: absolute;
+  z-index: -1;
+  top: -20%;
+  right: -30%;
+  width: 70%;
+  height: 70%;
+  background: linear-gradient(200deg, color-mix(in srgb, var(--bc-accent) 30%, transparent), transparent 60%);
+  transform: rotate(-24deg);
+}
+
+.boncard-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.boncard-ovr {
+  display: grid;
+  justify-items: center;
+  line-height: 0.9;
+}
+
+.boncard-ovr b {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 3.4rem;
+  color: var(--bc-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.boncard-ovr span {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+}
+
+.boncard-ovr i {
+  margin-top: 4px;
+  font-style: normal;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bc-muted);
+}
+
+.boncard-edition {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bc-accent);
+  color: #090d0c;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.boncard-photo {
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  width: 42%;
+  aspect-ratio: 1;
+  margin-top: -18px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--avatar-bg, var(--bc-accent));
+  box-shadow: 0 0 0 3px var(--bc-accent), 0 14px 30px rgba(0, 0, 0, 0.45);
+}
+
+.boncard-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.boncard-photo span {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.6rem;
+  color: #090d0c;
+}
+
+.boncard-name {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  min-width: 0;
+}
+
+.boncard-name strong {
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  line-height: 1;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boncard-name span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bc-accent);
+}
+
+.boncard-attrs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 10px;
+  margin: 0;
+  padding: 8px 4px;
+  border-top: 1px solid color-mix(in srgb, var(--bc-accent) 35%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--bc-accent) 35%, transparent);
+}
+
+.boncard-attrs div,
+.boncard-stats div {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+}
+
+.boncard-attrs dd {
+  order: -1;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.45rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.boncard-attrs dt,
+.boncard-stats dt {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--bc-muted);
+}
+
+.boncard-attrs .is-provisional dd {
+  opacity: 0.75;
+}
+
+.boncard-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  margin: 0;
+}
+
+.boncard-stats div {
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 0;
+}
+
+.boncard-stats dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.boncard-foot {
+  align-self: end;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--bc-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Edizioni: stessi testi, colori diversi. */
+.boncard-in_forma {
+  --bc-bg-1: #2e5a10;
+  --bc-bg-2: #1e3a12;
+}
+
+.boncard-mvp {
+  --bc-bg-1: #6b5418;
+  --bc-bg-2: #2e2410;
+  --bc-accent: #f5d98c;
+}
+
+.boncard-bomber {
+  --bc-bg-1: #6b2a18;
+  --bc-bg-2: #2e140e;
+  --bc-accent: #ff8466;
+}
+
+.boncard-tots {
+  --bc-bg-1: #1a3f5e;
+  --bc-bg-2: #0e2234;
+  --bc-accent: #6fd3ff;
+}
+
+.boncard-leggenda {
+  --bc-bg-1: #2a2310;
+  --bc-bg-2: #0b0b0b;
+  --bc-accent: #f5d98c;
+  --bc-text: #f5d98c;
+}
+
+/* ---------------------------------------------------------------- pagina giocatore */
+.player-layout {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .player-layout {
+    grid-template-columns: 340px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.player-card-col {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  align-content: start;
+}
+
+@media (min-width: 900px) {
+  .player-card-col {
+    position: sticky;
+    top: calc(var(--header-h) + 16px);
+  }
+}
+
+.breakdown {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.breakdown li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px var(--space-3);
+  padding: 10px 12px;
+  border-radius: var(--radius-m);
+  background: var(--c-surface-2);
+}
+
+.breakdown b {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+}
+
+.breakdown small {
+  grid-column: 1 / -1;
+  color: var(--c-text-2);
+  font-size: var(--fs-xs);
+}
+
+.editions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.editions li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 8px 10px;
+  border-radius: var(--radius-m);
+  opacity: 0.8;
+}
+
+.editions li.is-unlocked {
+  opacity: 1;
+  background: var(--c-surface-2);
+}
+
+.editions .grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.edition-dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  transform: rotate(45deg);
+  background: #c7ff36;
+}
+
+.edition-mvp,
+.edition-leggenda {
+  background: #f5d98c;
+}
+
+.edition-bomber {
+  background: #ff8466;
+}
+
+.edition-tots {
+  background: #6fd3ff;
+}
+
+.edition-base {
+  background: var(--c-text-2);
+}
+
+/* ---------------------------------------------------------------- grafici e tabelle */
+.chart {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.chart-title {
+  font-family: var(--font-editorial);
+  font-weight: 700;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 220px;
+}
+
+.chart-grid {
+  stroke: var(--c-border-strong);
+  stroke-dasharray: 3 6;
+}
+
+.chart-axis {
+  fill: var(--c-text-2);
+  font-size: 12px;
+  font-family: var(--font-body);
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--fs-sm);
+  color: var(--c-text-2);
+}
+
+.chart-legend i {
+  display: inline-block;
+  width: 14px;
+  height: 4px;
+  margin-right: 6px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table th,
+.data-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--c-border);
+  white-space: nowrap;
+}
+
+.data-table thead th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-2);
+}
+
+.attr-sliders {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  padding: var(--space-3);
+  border-radius: var(--radius-m);
+  background: var(--c-surface-2);
+}
+
+.attr-slider {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.attr-slider input {
+  width: 100%;
+  accent-color: var(--c-primary);
+}
+
+.rating-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.rating-row .rating-scale {
+  grid-column: 1 / -1;
+}

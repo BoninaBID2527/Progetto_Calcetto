@@ -50,10 +50,14 @@ const result = z
   .strict();
 
 const mvpVote = z.object({ mvpUserId: objectId }).strict();
-const ratings = z.object({ ratings: z.array(z.object({ userId: objectId, score: int(1, 10) }).strict()).min(1).max(30) }).strict();
+const attributeScores = z.object(Object.fromEntries(['vel', 'tir', 'pas', 'dri', 'dif', 'fis'].map((k) => [k, int(1, 10)]))).partial().strict();
+const ratings = z
+  .object({ ratings: z.array(z.object({ userId: objectId, score: int(1, 10), attributes: attributeScores.optional() }).strict()).min(1).max(30) })
+  .strict();
 const prizeVote = z.object({ option: z.string().trim().min(1).max(40) }).strict();
 
 const rankings = z.object({ period: z.enum(['mese', 'stagione', 'sempre']).default('sempre') });
+const cardScope = z.object({ scope: z.enum(['gruppo', 'carriera']).default('gruppo') });
 
 module.exports = {
   createMatch,
@@ -69,4 +73,5 @@ module.exports = {
   ratings,
   prizeVote,
   rankings,
+  cardScope,
 };
