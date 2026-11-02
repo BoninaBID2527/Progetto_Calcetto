@@ -11,6 +11,7 @@ module.exports = {
   Message: require('./Message'),
   Notification: require('./Notification'),
   Activity: require('./Activity'),
+  Poll: require('./Poll'),
   MvpVote,
   Rating,
   PrizeVote,

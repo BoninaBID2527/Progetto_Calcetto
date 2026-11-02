@@ -6,6 +6,7 @@ const matchService = require('./matchService');
 const statsEngine = require('./statsEngine');
 const rankingService = require('./rankingService');
 const activityService = require('./activityService');
+const pollService = require('./pollService');
 
 const MIN_SAMPLES = 5; // sotto queste partite le percentuali sono "provvisorie"
 
@@ -32,8 +33,11 @@ async function forUser(group, user) {
     return { key: r.key, title: r.title, position: entry?.position || null, value: entry?.display || null, total: r.entries.length, minMatches: r.minMatches };
   });
 
+  const openPolls = await pollService.list(group, { scope: 'aperte' });
+
   return {
     nextMatch: upcoming[0] || null,
+    openPolls,
     upcoming: upcoming.slice(1),
     openVoting,
     me: { ...summary, form: rows.slice(-5).map((r) => r.result), minSamples: MIN_SAMPLES },

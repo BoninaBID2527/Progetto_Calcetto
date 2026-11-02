@@ -9,6 +9,9 @@ import JoinByLink from './pages/JoinByLink';
 import GroupLayout from './pages/GroupLayout';
 import GroupMatches from './pages/GroupMatches';
 import Dashboard from './pages/Dashboard';
+import GroupPolls from './pages/GroupPolls';
+import NewPoll from './pages/NewPoll';
+import PollDetail from './pages/PollDetail';
 import NewMatch from './pages/NewMatch';
 import MatchDetail from './pages/MatchDetail';
 import GroupRankings from './pages/GroupRankings';
@@ -69,11 +72,14 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="partite" element={<GroupMatches />} />
           <Route path="nuova-partita" element={<NewMatch />} />
+          <Route path="boncall" element={<GroupPolls />} />
+          <Route path="boncall/nuova" element={<NewPoll />} />
           <Route path="classifiche" element={<GroupRankings />} />
           <Route path="chat" element={<GroupChat />} />
           <Route path="membri" element={<GroupMembers />} />
         </Route>
         <Route path="/partite/:matchId" element={<MatchDetail />} />
+        <Route path="/boncall/:pollId" element={<PollDetail />} />
         <Route path="/notifiche" element={<Notifications />} />
         <Route path="/profilo" element={<Profile />} />
       </Route>

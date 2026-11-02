@@ -92,11 +92,14 @@ const matchSchema = new Schema(
       default: null,
     },
     reminderSentAt: { type: Date, default: null },
+    // Convocazione BONCALL da cui è nata la partita (al massimo una partita per convocazione).
+    fromPoll: { type: Schema.Types.ObjectId, ref: 'Poll', default: undefined },
   },
   { timestamps: true }
 );
 
 matchSchema.index({ group: 1, startsAt: -1 });
 matchSchema.index({ status: 1, startsAt: 1 });
+matchSchema.index({ fromPoll: 1 }, { unique: true, partialFilterExpression: { fromPoll: { $type: 'objectId' } } });
 
 module.exports = model('Match', matchSchema);

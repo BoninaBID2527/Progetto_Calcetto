@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const config = require('../config/env');
 const { connectDatabase, disconnectDatabase } = require('../db');
-const { User, Group, Nickname, Match, Message, Notification, MvpVote, Rating, PrizeVote } = require('../models');
+const { User, Group, Nickname, Match, Message, Notification, MvpVote, Rating, PrizeVote, Poll } = require('../models');
 const { hashPassword } = require('../services/authService');
 const { balance } = require('../services/teamService');
 const { appConfig, DEFAULTS } = require('../config/appConfig');
@@ -328,15 +328,64 @@ async function seedGroupContent(u) {
   return summary;
 }
 
+/** Convocazioni BONCALL dimostrative: solo se il gruppo non ne ha ancora nessuna. */
+async function seedPolls(u) {
+  let created = 0;
+  const thursday = await Group.findOne({ name: 'Calcetto del giovedì', createdBy: u.marco._id });
+  if (thursday && !(await Poll.exists({ group: thursday._id }))) {
+    const confirmed = ['luca', 'andrea', 'simone', 'matteo', 'federico', 'davide'];
+    await Poll.create({
+      group: thursday._id,
+      author: u.luca._id,
+      mode: 'fissa',
+      field: 'villastellone',
+      startsAt: at(9),
+      playersNeeded: 10,
+      costCents: 7000,
+      notes: 'Partita extra: serve almeno un portiere.',
+      deadline: at(7, 20),
+      responses: [
+        ...confirmed.map((k, i) => ({ user: u[k]._id, response: 'ci_sono', respondedAt: new Date(Date.now() - (6 - i) * HOUR) })),
+        { user: u.stefano._id, response: 'forse', respondedAt: new Date(Date.now() - HOUR) },
+      ],
+      freeSlots: 10 - confirmed.length,
+    });
+    created += 1;
+  }
+  const monday = await Group.findOne({ name: 'Amici del lunedì', createdBy: u.luca._id });
+  if (monday && !(await Poll.exists({ group: monday._id }))) {
+    await Poll.create({
+      group: monday._id,
+      author: u.luca._id,
+      mode: 'opzioni',
+      playersNeeded: 6,
+      options: [
+        { key: 'o1', startsAt: at(11, 20, 30), field: 'cambiano' },
+        { key: 'o2', startsAt: at(12, 21), field: 'santena' },
+      ],
+      deadline: at(9, 21),
+      responses: [
+        { user: u.luca._id, response: 'ci_sono', options: ['o1', 'o2'], respondedAt: new Date(Date.now() - 5 * HOUR) },
+        { user: u.simone._id, response: 'ci_sono', options: ['o2'], respondedAt: new Date(Date.now() - 4 * HOUR) },
+        { user: u.federico._id, response: 'ci_sono', options: ['o1'], respondedAt: new Date(Date.now() - 2 * HOUR) },
+      ],
+      freeSlots: 6,
+    });
+    created += 1;
+  }
+  return created;
+}
+
 async function main() {
   await connectDatabase(config.mongoUri);
   const { byKey, created } = await ensureUsers();
   const summary = await seedGroupContent(byKey);
   // Il feed dei gruppi nasce dagli eventi già salvati (idempotente).
   summary.activities = await backfillActivity();
+  summary.polls = await seedPolls(byKey);
   console.log(`Seed completato su ${config.mongoUri}`);
   console.log(`  utenti creati: ${created} (già presenti: ${USERS.length - created})`);
-  console.log(`  gruppi creati: ${summary.groups}, partite: ${summary.matches}, messaggi: ${summary.messages}, voci del feed: ${summary.activities}`);
+  console.log(`  gruppi creati: ${summary.groups}, partite: ${summary.matches}, messaggi: ${summary.messages}, voci del feed: ${summary.activities}, convocazioni: ${summary.polls}`);
   console.log(`  password di tutti gli account: ${PASSWORD}`);
   console.log('  account admin: marco@calcetto.test');
   await disconnectDatabase();

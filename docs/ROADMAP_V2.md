@@ -10,7 +10,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M1 | Architettura dei nuovi modelli e contratti API (docs/ARCHITETTURA.md) | ✅ |
 | M2 | Design system NIGHT LEAGUE: token, font, Lucide, Motion, componenti, shell responsive | ✅ |
 | M3 | Dashboard "Spogliatoio" con hero MATCHDAY, azioni rapide, feed attività; restyling gruppi e partite | ✅ |
-| M4 | BONCALL: convocazioni, risposte atomiche, conversione idempotente, promemoria, notifiche in-app | ⏳ |
+| M4 | BONCALL: convocazioni, risposte atomiche, conversione idempotente, promemoria, notifiche in-app | ✅ |
 | M5 | PWA e Web Push (service worker, VAPID, subscription, preferenze, fasce silenziose) | ⏳ |
 | M6 | BONCARD e BONRATING (attributi, overall, edizioni, progressione, esportazione PNG) | ⏳ |
 | M7 | MATCHDAY e formazioni, Bilancia migliorato, locandina esportabile | ⏳ |
@@ -137,3 +137,12 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Emulatore: aggiunto `$type` (serve agli indici parziali), con `tests/mongoLite.test.js`.
 - Frontend: `/gruppi/:id` è la dashboard (hero MATCHDAY con countdown, posti, convocati e "Ci sono"; azioni rapide; votazioni da fare; il tuo campionato con forma V/P/S e avviso quando il campione è piccolo; posizioni in classifica; feed animato in tempo reale; prossime partite). Partite passate in formato "risultati" compatto. Navigazione con Home.
 - Test: 109 backend verdi (nuovi `dashboard.test.js`, `mongoLite.test.js`), build ok, screenshot 390/1280 senza overflow.
+
+### M4 — BONCALL e notifiche in-app (✅)
+- `services/registration.js`: posti atomici e lista d'attesa condivisi da partite e convocazioni (le partite ora usano questo modulo; tutti i test precedenti restano verdi).
+- Modello `Poll`, `pollService` (creazione fissa o a opzioni, risposte, completamento e riapertura, conversione idempotente con indice unico `Match.fromPoll`, annullamento, programma periodico: scadenza, promemoria a metà tempo, avviso 2 ore prima), rotte `/groups/:id/polls` e `/polls/:pid/*`.
+- Notifiche: `category`, `dedupeKey` con indice unico per utente, preferenze per categoria in `User.notificationPrefs` (le critiche non si spengono), avvisi "mancano 2/1", "completa", "posto libero" (al massimo uno all'ora), "si gioca", ricerca sostituto (uno al giorno per partita).
+- Frontend: elenco convocazioni, creazione (data fissa o 2-5 alternative), scheda con countdown, risposte in tempo reale, alternative con disponibilità, pannello organizzatore; convocazioni aperte in dashboard; "Crea" offre partita o BONCALL.
+- Seed: due convocazioni dimostrative aggiunte solo se il gruppo non ne ha.
+- Test: 124 backend verdi (15 BONCALL: concorrenza sull'ultimo posto, conversioni simultanee, deduplica, preferenze, scadenze); e2e `boncall.spec.js` con due browser verde.
+- Non ancora: invio push (M5). `pushService` per ora segna `pushStatus: "saltata"`.

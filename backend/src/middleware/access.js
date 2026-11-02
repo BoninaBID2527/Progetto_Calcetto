@@ -1,6 +1,6 @@
 'use strict';
 
-const { Group, Match } = require('../models');
+const { Group, Match, Poll } = require('../models');
 const { forbidden, notFound } = require('../utils/AppError');
 const { sameId } = require('../utils/helpers');
 
@@ -37,6 +37,19 @@ async function loadMatch(req, res, next) {
   return next();
 }
 
+/** Carica la convocazione da :pollId con lo stesso controllo di appartenenza al gruppo. */
+async function loadPoll(req, res, next) {
+  const poll = await Poll.findById(req.params.pollId);
+  if (!poll) return next(notFound('Convocazione non trovata.'));
+  const group = await Group.findById(poll.group);
+  const membership = group && membershipOf(group, req.user._id);
+  if (!membership) return next(forbidden('Non fai parte del gruppo di questa convocazione.'));
+  req.poll = poll;
+  req.group = group;
+  req.membership = membership;
+  return next();
+}
+
 const canManageMatch = (req) => req.membership.role === 'admin' || sameId(req.match.organizer, req.user._id);
 
 function requireMatchManager(req, res, next) {
@@ -44,4 +57,4 @@ function requireMatchManager(req, res, next) {
   return next();
 }
 
-module.exports = { loadGroup, requireGroupAdmin, loadMatch, requireMatchManager, canManageMatch, membershipOf };
+module.exports = { loadGroup, requireGroupAdmin, loadMatch, loadPoll, requireMatchManager, canManageMatch, membershipOf };

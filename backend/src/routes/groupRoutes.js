@@ -5,6 +5,8 @@ const ctrl = require('../controllers/groupController');
 const matchCtrl = require('../controllers/matchController');
 const chatCtrl = require('../controllers/chatController');
 const postCtrl = require('../controllers/postMatchController');
+const pollCtrl = require('../controllers/pollController');
+const pv = require('../validators/pollValidators');
 const { requireAuth } = require('../middleware/auth');
 const { loadGroup, requireGroupAdmin } = require('../middleware/access');
 const { validate, validIds } = require('../middleware/validate');
@@ -43,6 +45,8 @@ router.delete('/:groupId/nicknames/:nicknameId', admin, validIds('nicknameId'), 
 router.get('/:groupId/matches', inGroup, validate({ query: mv.listMatches }), matchCtrl.list);
 router.post('/:groupId/matches', inGroup, validate({ body: mv.createMatch }), matchCtrl.create);
 
+router.get('/:groupId/polls', inGroup, validate({ query: pv.list }), pollCtrl.list);
+router.post('/:groupId/polls', inGroup, validate({ body: pv.createPoll }), pollCtrl.create);
 router.get('/:groupId/rankings', inGroup, validate({ query: mv.rankings }), postCtrl.rankings);
 
 router.get('/:groupId/messages', inGroup, validate({ query: cv.listMessages }), chatCtrl.list);

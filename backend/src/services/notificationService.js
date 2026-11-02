@@ -1,11 +1,13 @@
 'use strict';
 
-const { Notification } = require('../models');
+const { Notification, User } = require('../models');
+const { CATEGORY_OF, CRITICAL } = require('../models/Notification');
 const realtime = require('./realtime');
 
 const toDto = (n) => ({
   id: String(n._id),
   type: n.type,
+  category: n.category,
   title: n.title,
   body: n.body,
   link: n.link,
@@ -14,12 +16,39 @@ const toDto = (n) => ({
   createdAt: n.createdAt,
 });
 
-/** Crea una notifica in-app per ciascun destinatario e la invia in tempo reale. */
-async function notify(userIds, { type, title, body = '', link = null, group = null }) {
-  const unique = [...new Set(userIds.map(String))];
+/** Destinatari che non hanno spento la categoria (le critiche arrivano sempre). */
+async function filterByPrefs(userIds, type, category) {
+  if (CRITICAL.includes(type)) return userIds;
+  const users = await User.find({ _id: { $in: userIds } }).select('notificationPrefs').lean();
+  const off = new Set(users.filter((u) => u.notificationPrefs?.categories?.[category] === false).map((u) => String(u._id)));
+  return userIds.filter((id) => !off.has(String(id)));
+}
+
+/**
+ * Crea la notifica in-app per ogni destinatario, la trasmette in tempo reale
+ * e la passa al servizio push. Con `dedupeKey` la stessa notifica non viene
+ * mai creata due volte per la stessa persona (indice unico): è ciò che rende
+ * innocui promemoria ripetuti, retry e richieste simultanee.
+ */
+async function notify(userIds, { type, title, body = '', link = null, group = null, category, dedupeKey }) {
+  const cat = category || CATEGORY_OF[type] || null;
+  const unique = await filterByPrefs([...new Set(userIds.map(String))], type, cat);
   if (!unique.length) return [];
-  const docs = await Notification.insertMany(unique.map((user) => ({ user, type, title, body, link, group })));
+  let docs;
+  if (dedupeKey) {
+    docs = [];
+    for (const user of unique) {
+      try {
+        docs.push(await Notification.create({ user, type, title, body, link, group, category: cat, dedupeKey }));
+      } catch (err) {
+        if (err.code !== 11000) throw err;
+      }
+    }
+  } else {
+    docs = await Notification.insertMany(unique.map((user) => ({ user, type, title, body, link, group, category: cat })));
+  }
   for (const doc of docs) realtime.toUser(doc.user, 'notification:new', toDto(doc));
+  if (docs.length) await require('./pushService').deliver(docs);
   return docs;
 }
 

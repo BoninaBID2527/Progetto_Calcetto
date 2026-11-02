@@ -10,6 +10,7 @@ const notificationService = require('./notificationService');
 const chatService = require('./chatService');
 const realtime = require('./realtime');
 const activityService = require('./activityService');
+const registration = require('./registration');
 
 // ------------------------------------------------------------------ DTO
 
@@ -250,29 +251,10 @@ async function autoClose(now = new Date()) {
 
 /**
  * Fa entrare chi è in lista d'attesa finché ci sono posti liberi, in ordine
- * di arrivo. Ogni ingresso è un'operazione atomica che richiede un posto
- * libero e che la persona sia ancora in attesa.
+ * di arrivo (logica condivisa in registration.js), poi avvisa i promossi.
  */
 async function promoteWaitlist(matchId) {
-  const promoted = [];
-  for (let guard = 0; guard < 100; guard++) {
-    const m = await Match.findById(matchId).lean();
-    if (!m || m.status !== 'aperta' || m.freeSlots <= 0) break;
-    const next = m.participants
-      .filter((p) => p.response === 'attesa')
-      .sort((a, b) => new Date(a.waitlistedAt) - new Date(b.waitlistedAt))[0];
-    if (!next) break;
-    const updated = await Match.findOneAndUpdate(
-      { _id: matchId, status: 'aperta', freeSlots: { $gt: 0 }, participants: { $elemMatch: { user: next.user, response: 'attesa' } } },
-      {
-        $set: { 'participants.$[p].response': 'ci_sono', 'participants.$[p].promotedAt': new Date() },
-        $inc: { freeSlots: -1 },
-      },
-      { new: true, arrayFilters: [{ 'p.user': next.user }] }
-    );
-    if (updated) promoted.push(next.user);
-  }
-
+  const promoted = await registration.promoteWaitlist(Match, matchId, { field: 'participants', open: { status: 'aperta' } });
   if (promoted.length) {
     const m = await Match.findById(matchId).lean();
     const resolve = await userResolver(promoted);
@@ -293,99 +275,48 @@ async function promoteWaitlist(matchId) {
 }
 
 /**
- * Registra la risposta "Ci sono", "Forse" o "Non ci sono". Ogni ramo è un
- * singolo findOneAndUpdate con condizioni: due persone non possono prendere
- * lo stesso ultimo posto e chi è in lista d'attesa non viene scavalcato.
+ * Quando qualcuno si ritira da una partita che era al completo e nessuno è
+ * in lista d'attesa, chi non ha ancora risposto (o ha detto "forse") riceve
+ * un solo avviso al giorno: "cercasi sostituto".
+ */
+async function lookForSubstitute(before, after) {
+  const wasFull = before.freeSlots === 0;
+  const soon = new Date(after.startsAt) - Date.now() < 7 * 86_400_000;
+  if (!wasFull || after.freeSlots <= 0 || !soon || after.participants.some((p) => p.response === 'attesa')) return;
+  const { Group } = require('../models');
+  const group = await Group.findById(after.group).lean();
+  const answered = new Set(after.participants.filter((p) => p.response !== 'forse').map((p) => String(p.user)));
+  const targets = group.members.map((m) => String(m.user)).filter((id) => !answered.has(id));
+  const dayKey = new Date().toISOString().slice(0, 10);
+  await notificationService.notify(targets, {
+    type: 'sostituto',
+    category: 'boncall',
+    title: `Cercasi sostituto per ${dayOf(after)}`,
+    body: `Si è liberato un posto a ${fieldName(after.field)}: il primo che risponde "Ci sono" entra.`,
+    link: `/partite/${after._id}`,
+    group: after.group,
+    dedupeKey: `sostituto:${after._id}:${dayKey}`,
+  });
+}
+
+/**
+ * Registra la risposta "Ci sono", "Forse" o "Non ci sono". Posti e lista
+ * d'attesa sono gestiti in modo atomico da registration.register.
  */
 async function respond(match, user, response) {
   if (match.status !== 'aperta') throw conflict('La partita è chiusa: non si accettano più risposte.');
   const uid = user._id;
-  const now = new Date();
-  const mine = match.participants.find((p) => sameId(p.user, uid));
-  const base = { _id: match._id, status: 'aperta' };
-  const asMe = { arrayFilters: [{ 'me.user': uid }], new: true };
-  let updated = null;
-  let outcome = response;
-  let freedSlot = false;
+  const { updated, outcome, freedSlot } = await registration.register(Match, match, uid, response, {
+    field: 'participants',
+    open: { status: 'aperta' },
+    closedMessage: 'La partita è chiusa: non si accettano più risposte.',
+  });
 
-  if (response === 'ci_sono') {
-    if (mine?.response === 'ci_sono') throw conflict('Sei già iscritto a questa partita.');
-    if (mine?.response === 'attesa') throw conflict("Sei già in lista d'attesa.");
-    const takeSlot = { freeSlots: { $gt: 0 }, 'participants.response': { $ne: 'attesa' } };
-    if (!mine) {
-      const filter = { ...base, 'participants.user': { $ne: uid } };
-      updated = await Match.findOneAndUpdate(
-        { ...filter, ...takeSlot },
-        { $push: { participants: { user: uid, response: 'ci_sono', respondedAt: now } }, $inc: { freeSlots: -1 } },
-        { new: true }
-      );
-      if (!updated) {
-        outcome = 'attesa';
-        updated = await Match.findOneAndUpdate(
-          filter,
-          { $push: { participants: { user: uid, response: 'attesa', respondedAt: now, waitlistedAt: now } } },
-          { new: true }
-        );
-      }
-    } else {
-      const filter = { ...base, participants: { $elemMatch: { user: uid, response: mine.response } } };
-      updated = await Match.findOneAndUpdate(
-        { ...filter, ...takeSlot },
-        { $set: { 'participants.$[me].response': 'ci_sono', 'participants.$[me].respondedAt': now }, $inc: { freeSlots: -1 } },
-        asMe
-      );
-      if (!updated) {
-        outcome = 'attesa';
-        updated = await Match.findOneAndUpdate(
-          filter,
-          { $set: { 'participants.$[me].response': 'attesa', 'participants.$[me].respondedAt': now, 'participants.$[me].waitlistedAt': now } },
-          asMe
-        );
-      }
+  if (freedSlot) {
+    await Match.updateOne({ _id: match._id }, { $set: { 'participants.$[me].paid': false } }, { arrayFilters: [{ 'me.user': uid }] });
+    if (updated.teams) {
+      await Match.updateOne({ _id: match._id, teams: { $ne: null } }, { $pull: { 'teams.a.players': uid, 'teams.b.players': uid } });
     }
-  } else {
-    if (mine?.response === response) throw conflict('Hai già dato questa risposta.');
-    if (!mine) {
-      updated = await Match.findOneAndUpdate(
-        { ...base, 'participants.user': { $ne: uid } },
-        { $push: { participants: { user: uid, response, respondedAt: now } } },
-        { new: true }
-      );
-    } else {
-      freedSlot = mine.response === 'ci_sono';
-      updated = await Match.findOneAndUpdate(
-        { ...base, participants: { $elemMatch: { user: uid, response: mine.response } } },
-        {
-          $set: {
-            'participants.$[me].response': response,
-            'participants.$[me].respondedAt': now,
-            'participants.$[me].waitlistedAt': null,
-            'participants.$[me].paid': false,
-          },
-          ...(freedSlot ? { $inc: { freeSlots: 1 } } : {}),
-        },
-        asMe
-      );
-    }
-  }
-
-  if (!updated) {
-    // Qualcun altro ha cambiato la partita tra la lettura e la scrittura.
-    const fresh = await Match.findById(match._id).lean();
-    if (!fresh) throw notFound('Partita non trovata.');
-    if (fresh.status !== 'aperta') throw conflict('La partita è chiusa: non si accettano più risposte.');
-    const now2 = fresh.participants.find((p) => sameId(p.user, uid));
-    if (now2 && ['ci_sono', 'attesa'].includes(now2.response) && response === 'ci_sono') {
-      throw conflict('Sei già iscritto a questa partita.');
-    }
-    throw conflict('La partita è cambiata nel frattempo: riprova.');
-  }
-
-  if (freedSlot && updated.teams) {
-    await Match.updateOne(
-      { _id: match._id, teams: { $ne: null } },
-      { $pull: { 'teams.a.players': uid, 'teams.b.players': uid } }
-    );
   }
 
   const day = dayOf(updated);
@@ -397,6 +328,7 @@ async function respond(match, user, response) {
   if (freedSlot) await chatService.postSystem(match.group, `${user.name} non ci sarà più ${day}: si libera un posto.`);
 
   const promoted = freedSlot ? await promoteWaitlist(match._id) : [];
+  if (freedSlot && !promoted.length) await lookForSubstitute(match, await Match.findById(match._id).lean());
   const dto = await broadcast(match._id);
   return { match: dto, outcome, promoted: promoted.map(String) };
 }

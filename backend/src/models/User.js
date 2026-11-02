@@ -17,6 +17,23 @@ const userSchema = new Schema(
       // "ridotto" spegne le animazioni anche se il sistema non lo chiede.
       motion: { type: String, enum: ['auto', 'ridotto'], default: 'auto' },
     },
+    notificationPrefs: {
+      // Le push si attivano solo dopo il consenso esplicito dal profilo.
+      push: { type: Boolean, default: false },
+      categories: {
+        boncall: { type: Boolean, default: true },
+        partite: { type: Boolean, default: true },
+        promemoria: { type: Boolean, default: true },
+        risultati: { type: Boolean, default: true },
+        social: { type: Boolean, default: true },
+      },
+      quietHours: {
+        enabled: { type: Boolean, default: true },
+        start: { type: String, default: '23:00' },
+        end: { type: String, default: '08:00' },
+      },
+      maxPushPerHour: { type: Number, default: 6, min: 1, max: 30 },
+    },
   },
   { timestamps: true }
 );

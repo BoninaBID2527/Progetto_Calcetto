@@ -3,6 +3,7 @@ import { Link, useOutletContext } from 'react-router-dom';
 import Icon from '../components/Icon';
 import MatchdayHero from '../components/dashboard/MatchdayHero';
 import ActivityFeed from '../components/dashboard/ActivityFeed';
+import PollCard from '../components/boncall/PollCard';
 import FieldBadge from '../components/FieldBadge';
 import { Card, CardHeader, CardSkeleton, ErrorState, StatCard } from '../components/ui';
 import { api } from '../api/client';
@@ -41,6 +42,8 @@ export default function Dashboard() {
   useRealtimeEvent('activity:new', (a) => setData((d) => (d ? { ...d, activity: [a, ...d.activity.filter((x) => x.id !== a.id)].slice(0, 8) } : d)));
   useRealtimeEvent('match:updated', (m) => m.groupId === group.id && reload());
   useRealtimeEvent('match:created', (m) => m.groupId === group.id && reload());
+  useRealtimeEvent('poll:created', (p) => p.groupId === group.id && reload());
+  useRealtimeEvent('poll:updated', (p) => p.groupId === group.id && reload());
   useOnReconnect(reload);
 
   const canOrganize = group.settings.organizers === 'tutti' || group.myRole === 'admin';
@@ -82,6 +85,7 @@ export default function Dashboard() {
   const fewMatches = me.played < me.minSamples;
   const quick = [
     canOrganize && { to: `${base}/nuova-partita`, icon: 'plus', label: 'Nuova partita', primary: true },
+    canOrganize && { to: `${base}/boncall/nuova`, icon: 'boncall', label: 'Cerca giocatori' },
     { to: `${base}/classifiche`, icon: 'trophy', label: 'Classifiche' },
     { to: `${base}/partite`, icon: 'calendar', label: 'Tutte le partite' },
     { to: `${base}/membri`, icon: 'users', label: 'Il gruppo' },
@@ -99,6 +103,19 @@ export default function Dashboard() {
           </Link>
         ))}
       </nav>
+
+      {data.openPolls.length > 0 && (
+        <section className="stack" aria-labelledby="polls-title" style={{ gap: 'var(--space-2)' }}>
+          <h2 id="polls-title" className="section-title">
+            <Icon name="boncall" /> Convocazioni aperte
+          </h2>
+          <div className="poll-list">
+            {data.openPolls.map((p) => (
+              <PollCard key={p.id} poll={p} userId={user.id} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {data.openVoting.length > 0 && (
         <section className="todo-strip" aria-label="Da fare">

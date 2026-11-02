@@ -8,6 +8,7 @@ import { useResource } from '../hooks/useResource';
 const TABS = [
   { to: '', label: 'Spogliatoio', icon: 'dashboard', end: true },
   { to: 'partite', label: 'Partite', icon: 'calendar' },
+  { to: 'boncall', label: 'BONCALL', icon: 'boncall' },
   { to: 'classifiche', label: 'Classifiche', icon: 'trophy' },
   { to: 'chat', label: 'Chat', icon: 'chat' },
   { to: 'membri', label: 'Membri', icon: 'users' },

@@ -4,6 +4,7 @@ const { Match, Group } = require('../models');
 const matchService = require('../services/matchService');
 const votingService = require('../services/votingService');
 const notificationService = require('../services/notificationService');
+const pollService = require('../services/pollService');
 const { sameId } = require('../utils/helpers');
 
 const DAY = 86_400_000;
@@ -39,7 +40,8 @@ async function tick(now = new Date()) {
   const reminders = await sendReminders(now);
   const closed = await matchService.autoClose(now);
   const finalized = await votingService.finalizeExpired(now);
-  return { reminders, closed, finalized };
+  const polls = await pollService.runJobs(now);
+  return { reminders, closed, finalized, polls };
 }
 
 let timer = null;

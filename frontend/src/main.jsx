@@ -17,6 +17,7 @@ import './styles/layout.css';
 import './styles/pages.css';
 import './styles/night-league.css';
 import './styles/dashboard.css';
+import './styles/boncall.css';
 import App from './App';
 import { APP_NAME } from './config';
 import { ThemeProvider } from './context/ThemeContext';
