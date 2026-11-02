@@ -14,7 +14,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M5 | PWA e Web Push (service worker, VAPID, subscription, preferenze, fasce silenziose) | ✅ |
 | M6 | BONCARD e BONRATING (attributi, overall, edizioni, progressione, esportazione PNG) | ✅ |
 | M7 | MATCHDAY e formazioni, Bilancia migliorato, locandina esportabile | ✅ |
-| M8 | Rivalità | ⏳ |
+| M8 | Rivalità | ✅ |
 | M9 | Stagioni, nuove classifiche, Hall of Fame | ⏳ |
 | M10 | Premi partita e achievement | ⏳ |
 | M11 | Club personalizzati (stemma, colori, maglie, copertina) | ⏳ |
@@ -167,3 +167,9 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - `services/headToHead.js` (scontri diretti, partite insieme, gol, MVP, voti, ultime 5, serie in corso, soglia di affidabilità 3) e `matchdayService` con rotta `GET /matches/:mid/matchday` (overall dei convocati, media delle squadre, in forma, rivalità in campo).
 - Frontend: schermata `/partite/:id/matchday` con locandina, countdown, VS con overall medio, campo con formazioni 1-2-2 e badge overall, in forma, rivalità, convocati con link alla BONCARD; esportazione della locandina verticale 1080×1920 e quadrata 1080×1080 (solo nomi, soprannomi, campo e data). Accesso da scheda partita e hero della home.
 - Test: 147 backend verdi (nuovi: ruoli divisi, niente formazione ripetuta, testa a testa, MATCHDAY via API).
+
+### M8 — Rivalità (✅)
+- Modello `Rivalry` (coppia unica per gruppo, nessun testo libero quindi niente contenuti offensivi, stato proposta/attiva/rifiutata), `rivalryService` (rivalità naturali da almeno 3 scontri diretti, schermata VS, proposta, risposta solo dello sfidato, chiusura da parte di uno dei due, riproposta dopo un rifiuto), notifica `rivalita` nella categoria "social".
+- Rotte `GET/POST /groups/:id/rivalries`, `GET /groups/:id/rivalries/:userId?with=`, `POST /rivalries/:rid/accept|decline`, `DELETE /rivalries/:rid`.
+- Frontend: pagina Rivalità (proposte da accettare, dichiarate, naturali, sfida un compagno con anteprima del testa a testa) e schermata VS con ingresso animato, record, confronto a barre, partite insieme, serie in corso, ultimi scontri, avviso quando i confronti sono meno di 3.
+- Test: 151 backend verdi (4 nuovi), screenshot 390/1280 senza overflow.

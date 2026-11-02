@@ -36,5 +36,7 @@ const setRole = z.object({ role: z.enum(['admin', 'member']) }).strict();
 const proposeNickname = z.object({ targetUserId: objectId, text: trimmed(2, 30) }).strict();
 const replaceNickname = z.object({ text: trimmed(2, 30) }).strict();
 const listNicknames = z.object({ userId: objectId.optional() });
+const proposeRivalry = z.object({ targetUserId: objectId }).strict();
+const versusQuery = z.object({ with: objectId.optional() });
 
-module.exports = { createGroup, updateGroup, join, setRole, proposeNickname, replaceNickname, listNicknames };
+module.exports = { proposeRivalry, versusQuery, createGroup, updateGroup, join, setRole, proposeNickname, replaceNickname, listNicknames };

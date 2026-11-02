@@ -14,6 +14,7 @@ router.use('/groups', require('./groupRoutes'));
 router.use('/matches', require('./matchRoutes'));
 router.use('/polls', require('./pollRoutes'));
 router.use('/push', require('./pushRoutes'));
+router.use('/rivalries', require('./rivalryRoutes'));
 router.use('/notifications', require('./notificationRoutes'));
 
 module.exports = router;

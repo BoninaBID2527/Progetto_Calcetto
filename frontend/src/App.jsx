@@ -14,6 +14,8 @@ import NewPoll from './pages/NewPoll';
 import PollDetail from './pages/PollDetail';
 import PlayerProfile from './pages/PlayerProfile';
 import Matchday from './pages/Matchday';
+import Rivalries from './pages/Rivalries';
+import Versus from './pages/Versus';
 import NewMatch from './pages/NewMatch';
 import MatchDetail from './pages/MatchDetail';
 import GroupRankings from './pages/GroupRankings';
@@ -77,6 +79,8 @@ export default function App() {
           <Route path="boncall" element={<GroupPolls />} />
           <Route path="boncall/nuova" element={<NewPoll />} />
           <Route path="giocatori/:userId" element={<PlayerProfile />} />
+          <Route path="rivalita" element={<Rivalries />} />
+          <Route path="rivalita/:userId" element={<Versus />} />
           <Route path="classifiche" element={<GroupRankings />} />
           <Route path="chat" element={<GroupChat />} />
           <Route path="membri" element={<GroupMembers />} />

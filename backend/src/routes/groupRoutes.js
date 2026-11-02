@@ -7,6 +7,7 @@ const chatCtrl = require('../controllers/chatController');
 const postCtrl = require('../controllers/postMatchController');
 const pollCtrl = require('../controllers/pollController');
 const playerCtrl = require('../controllers/playerController');
+const rivalryCtrl = require('../controllers/rivalryController');
 const pv = require('../validators/pollValidators');
 const { requireAuth } = require('../middleware/auth');
 const { loadGroup, requireGroupAdmin } = require('../middleware/access');
@@ -50,6 +51,9 @@ router.get('/:groupId/polls', inGroup, validate({ query: pv.list }), pollCtrl.li
 router.post('/:groupId/polls', inGroup, validate({ body: pv.createPoll }), pollCtrl.create);
 router.get('/:groupId/players/:userId/card', inGroup, validIds('userId'), validate({ query: mv.cardScope }), playerCtrl.card);
 router.get('/:groupId/players/:userId/progression', inGroup, validIds('userId'), playerCtrl.progression);
+router.get('/:groupId/rivalries', inGroup, rivalryCtrl.list);
+router.post('/:groupId/rivalries', inGroup, validate({ body: gv.proposeRivalry }), rivalryCtrl.propose);
+router.get('/:groupId/rivalries/:userId', inGroup, validIds('userId'), validate({ query: gv.versusQuery }), rivalryCtrl.detail);
 router.get('/:groupId/rankings', inGroup, validate({ query: mv.rankings }), postCtrl.rankings);
 
 router.get('/:groupId/messages', inGroup, validate({ query: cv.listMessages }), chatCtrl.list);

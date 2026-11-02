@@ -13,6 +13,7 @@ module.exports = {
   Activity: require('./Activity'),
   Poll: require('./Poll'),
   PushSubscription: require('./PushSubscription'),
+  Rivalry: require('./Rivalry'),
   MvpVote,
   Rating,
   PrizeVote,
