@@ -18,6 +18,14 @@ function summary(group, userId, extra = {}) {
     description: group.description,
     emoji: group.emoji,
     color: group.color,
+    motto: group.motto || '',
+    secondaryColor: group.secondaryColor || null,
+    crestUrl: group.crestUrl || null,
+    hasCover: Boolean(group.coverUrl),
+    kits: {
+      light: { primary: group.kits?.light?.primary || null, secondary: group.kits?.light?.secondary || null },
+      dark: { primary: group.kits?.dark?.primary || null, secondary: group.kits?.dark?.secondary || null },
+    },
     inviteCode: group.inviteCode,
     memberCount: group.members.length,
     myRole: me ? me.role : null,
@@ -108,8 +116,9 @@ async function join(user, code) {
 }
 
 async function update(group, user, data) {
-  const { settings, ...rest } = data;
+  const { settings, kits, ...rest } = data;
   group.set(rest);
+  if (kits) for (const [side, colors] of Object.entries(kits)) for (const [k, v] of Object.entries(colors)) group.kits[side][k] = v;
   if (settings) {
     const { extraPrizeOptions, ...otherSettings } = settings;
     for (const [k, v] of Object.entries(otherSettings)) {

@@ -1,3 +1,4 @@
+import ClubCrest from '../components/club/ClubCrest';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon';
@@ -130,9 +131,7 @@ export default function Groups() {
         <div className="grid">
           {groups.map((g) => (
             <Link key={g.id} to={`/gruppi/${g.id}/partite`} className="card group-tile" style={{ '--group-color': g.color }}>
-              <span className="group-emoji" aria-hidden="true">
-                {g.emoji}
-              </span>
+              <ClubCrest group={g} size={60} />
               <span className="stack" style={{ gap: 4, flex: 1 }}>
                 <strong style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', textTransform: 'uppercase', lineHeight: 1.1 }}>{g.name}</strong>
                 <span className="muted">

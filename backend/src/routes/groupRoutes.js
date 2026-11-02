@@ -11,6 +11,8 @@ const rivalryCtrl = require('../controllers/rivalryController');
 const pv = require('../validators/pollValidators');
 const { requireAuth } = require('../middleware/auth');
 const { loadGroup, requireGroupAdmin } = require('../middleware/access');
+const { uploadImage } = require('../middleware/upload');
+const { LIMITS } = require('../services/clubService');
 const { validate, validIds } = require('../middleware/validate');
 const gv = require('../validators/groupValidators');
 const mv = require('../validators/matchValidators');
@@ -58,6 +60,11 @@ router.get('/:groupId/rivalries/:userId', inGroup, validIds('userId'), validate(
 router.get('/:groupId/seasons', inGroup, ctrl.listSeasons);
 router.post('/:groupId/seasons', admin, validate({ body: gv.createSeason }), ctrl.createSeason);
 router.delete('/:groupId/seasons/:seasonId', admin, validIds('seasonId'), ctrl.removeSeason);
+router.get('/:groupId/club', inGroup, ctrl.club);
+router.put('/:groupId/club/crest', admin, uploadImage(LIMITS.crest), ctrl.setClubImage('crest'));
+router.delete('/:groupId/club/crest', admin, ctrl.removeClubImage('crest'));
+router.put('/:groupId/club/cover', admin, uploadImage(LIMITS.cover), ctrl.setClubImage('cover'));
+router.delete('/:groupId/club/cover', admin, ctrl.removeClubImage('cover'));
 router.get('/:groupId/hall-of-fame', inGroup, ctrl.hallOfFame);
 router.get('/:groupId/rankings', inGroup, validate({ query: mv.rankings }), postCtrl.rankings);
 

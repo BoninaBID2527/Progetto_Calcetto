@@ -1,3 +1,4 @@
+import ClubCrest from '../components/club/ClubCrest';
 import { NavLink, Outlet, useParams, Link, useMatch } from 'react-router-dom';
 import Icon from '../components/Icon';
 import { CardSkeleton, EmptyState } from '../components/ui';
@@ -50,9 +51,7 @@ export default function GroupLayout() {
   return (
     <div className="page" style={{ paddingBottom: 0 }}>
       <header className="row" style={{ flexWrap: 'nowrap' }}>
-        <span className="group-emoji" style={{ '--group-color': group.color, width: 52, height: 52, fontSize: '1.6rem' }} aria-hidden="true">
-          {group.emoji}
-        </span>
+        <ClubCrest group={group} size={52} />
         <div className="page-head-text">
           <h1 style={{ fontSize: 'clamp(1.6rem, 1.2rem + 1.6vw, 2.6rem)' }}>{group.name}</h1>
           {group.description && !inChat && (

@@ -17,7 +17,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M8 | Rivalità | ✅ |
 | M9 | Stagioni, nuove classifiche, Hall of Fame | ✅ |
 | M10 | Premi partita e achievement | ✅ |
-| M11 | Club personalizzati (stemma, colori, maglie, copertina) | ⏳ |
+| M11 | Club personalizzati (stemma, colori, maglie, copertina) | ✅ |
 | M12 | Calendario intelligente e partite ricorrenti | ⏳ |
 | M13 | Cassa del gruppo (registro dichiarato/verificato) | ⏳ |
 | M14 | Terzo tempo evoluto | ⏳ |
@@ -189,3 +189,10 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Frontend: pannello "Premi della serata" nella partita (voto, assegnazione, premiazione animata con Motion, statica con animazioni ridotte dal profilo), traguardi nella BONCARD, impostazioni admin dei premi, voci nel feed.
 - Test: 176 backend verdi (12 nuovi in `awards.test.js`: attivazione e permessi, bomber, voto, chiusura e pari merito, idempotenza, assegnazione, achievement con concorrenza, storico).
 - Limite: gli "effetti" di premiazione sono animazioni leggere (nessun suono né schermata a pieno schermo); disattivabili con "animazioni ridotte" del profilo.
+
+### M11 — Club personalizzati (✅)
+- `Group`: `motto` (80), `secondaryColor`, `crestUrl`, `coverUrl`, `kits { light, dark } { primary, secondary }`. Colori validati come `#RRGGBB` (nessun valore libero che finisca in CSS), modificabili solo dagli admin con `PATCH /groups/:id`.
+- Upload sicuro (`multer` in memoria, un solo file nel campo `file`): tipo deciso dai **primi byte** (PNG, JPEG, WebP; SVG, GIF, PDF e file con estensione falsa rifiutati con 422), limiti 128 KB per lo stemma e 700 KB per la copertina (413 oltre il limite), salvataggio come data URL, nessun file su disco. Rotte `PUT/DELETE /groups/:id/club/crest|cover` solo admin; `GET /groups/:id/club` per i membri (identità con copertina + statistiche reali: partite, gol, gol a partita, giocatori, MVP assegnati, stagione attiva, capocannoniere, più presenze, più MVP con pari merito). Il riepilogo del gruppo include lo stemma ma solo un flag per la copertina, per non appesantire gli elenchi. Gruppi privati per impostazione predefinita: nessuna lettura senza appartenenza.
+- Frontend: pagina `/gruppi/:id/club` (voce "Il club") con copertina, stemma, motto, statistiche, maglie disegnate in SVG con i colori scelti, editor admin con anteprima e controlli lato client (tipo e peso); lo stemma sostituisce l'emoji in intestazione e nell'elenco gruppi, con il simbolo e il colore come fallback grafico. Il client API accetta `FormData`.
+- Test: 183 backend verdi (7 nuovi in `club.test.js`). Verificato a mano il caricamento dal browser, compreso un SVG rinominato `.png` (rifiutato dal server).
+- Limite: nessun ridimensionamento lato server (non c'è libreria di immagini): i limiti di peso servono a questo; l'admin deve caricare immagini già piccole.

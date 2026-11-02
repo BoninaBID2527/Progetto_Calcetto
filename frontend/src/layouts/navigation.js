@@ -15,6 +15,7 @@ export function navigationFor(group, { unreadNotifications = 0, userId } = {}) {
     chat: { label: 'Chat', icon: 'chat', to: inGroup('/chat'), badge: group?.unreadCount || 0, badgeLabel: `${group?.unreadCount || 0} messaggi non letti` },
     membri: { label: 'Membri', icon: 'users', to: inGroup('/membri') },
     boncall: { label: 'Convocazioni', icon: 'boncall', to: inGroup('/boncall') },
+    club: { label: 'Il club', icon: 'shield', to: inGroup('/club') },
     hall: { label: 'Hall of Fame', icon: 'crown', to: inGroup('/hall-of-fame') },
     rivalita: { label: 'Rivalità', icon: 'rivalry', to: inGroup('/rivalita') },
     boncard: { label: 'La mia BONCARD', icon: 'card', to: inGroup(`/giocatori/${userId}`) },
@@ -34,10 +35,10 @@ export function navigationFor(group, { unreadNotifications = 0, userId } = {}) {
     home: group ? base : '/gruppi',
     create,
     bottom: [items.home, items.partite, items.chat],
-    more: [items.boncall, items.boncard, items.classifiche, items.hall, items.rivalita, items.membri, items.notifiche, items.profilo, items.gruppi],
+    more: [items.boncall, items.boncard, items.club, items.classifiche, items.hall, items.rivalita, items.membri, items.notifiche, items.profilo, items.gruppi],
     moreBadge: unreadNotifications,
     sections: [
-      { title: group ? group.name : 'Gruppo', items: [items.home, items.partite, items.boncall, items.classifiche, items.hall, items.rivalita, items.chat, items.membri] },
+      { title: group ? group.name : 'Gruppo', items: [items.home, items.partite, items.boncall, items.classifiche, items.hall, items.rivalita, items.chat, items.club, items.membri] },
       { title: 'Tu', items: [...(group ? [items.boncard] : []), items.notifiche, items.profilo, items.gruppi] },
     ],
   };

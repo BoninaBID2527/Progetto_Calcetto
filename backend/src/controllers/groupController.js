@@ -5,6 +5,7 @@ const nicknameService = require('../services/nicknameService');
 const dashboardService = require('../services/dashboardService');
 const activityService = require('../services/activityService');
 const seasonService = require('../services/seasonService');
+const clubService = require('../services/clubService');
 const hallOfFameService = require('../services/hallOfFameService');
 
 const list = async (req, res) => res.json({ groups: await groupService.listMine(req.user) });
@@ -58,7 +59,14 @@ const removeSeason = async (req, res) => {
 };
 const hallOfFame = async (req, res) => res.json({ hallOfFame: await hallOfFameService.forGroup(req.group) });
 
+const club = async (req, res) => res.json({ club: await clubService.profile(req.group) });
+const setClubImage = (kind) => async (req, res) => res.json({ group: await clubService.setImage(req.group, req.user, kind, req.file) });
+const removeClubImage = (kind) => async (req, res) => res.json({ group: await clubService.removeImage(req.group, req.user, kind) });
+
 module.exports = {
+  club,
+  setClubImage,
+  removeClubImage,
   listSeasons,
   createSeason,
   removeSeason,

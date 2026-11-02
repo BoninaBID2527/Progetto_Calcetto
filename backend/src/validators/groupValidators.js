@@ -35,8 +35,18 @@ const settings = z
   .partial()
   .strict();
 
+const kit = z.object({ primary: color, secondary: color }).partial().strict();
 const updateGroup = z
-  .object({ name: trimmed(2, 50), description: z.string().trim().max(280), emoji, color, settings })
+  .object({
+    name: trimmed(2, 50),
+    description: z.string().trim().max(280),
+    emoji,
+    color,
+    motto: z.string().trim().max(80),
+    secondaryColor: color.nullable(),
+    kits: z.object({ light: kit, dark: kit }).partial().strict(),
+    settings,
+  })
   .partial()
   .strict();
 

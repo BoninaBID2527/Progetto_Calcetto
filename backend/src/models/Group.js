@@ -28,6 +28,15 @@ const groupSchema = new Schema(
     description: { type: String, default: '', maxlength: 280 },
     emoji: { type: String, default: '⚽', maxlength: 8 },
     color: { type: String, default: '#2EE59D' },
+    // Identità del club. Le immagini sono data URL di PNG/JPEG/WebP verificati dai primi byte.
+    motto: { type: String, default: '', maxlength: 80 },
+    secondaryColor: { type: String, default: null },
+    crestUrl: { type: String, default: null },
+    coverUrl: { type: String, default: null },
+    kits: {
+      light: { primary: { type: String, default: null }, secondary: { type: String, default: null } },
+      dark: { primary: { type: String, default: null }, secondary: { type: String, default: null } },
+    },
     inviteCode: { type: String, required: true, unique: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     members: { type: [memberSchema], default: [] },
