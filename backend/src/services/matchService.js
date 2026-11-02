@@ -9,6 +9,7 @@ const nicknameService = require('./nicknameService');
 const notificationService = require('./notificationService');
 const chatService = require('./chatService');
 const realtime = require('./realtime');
+const activityService = require('./activityService');
 
 // ------------------------------------------------------------------ DTO
 
@@ -141,6 +142,7 @@ async function create(group, user, data) {
     group: group._id,
   });
   await chatService.postSystem(group._id, `${user.name} ha creato una partita a ${fieldName(match.field)} per ${day}. Iscrizioni aperte!`);
+  await activityService.record(group._id, 'partita_creata', { actor: user._id, match: match._id, data: { field: match.field }, key: `creata:${match._id}` });
   return dto;
 }
 
@@ -284,6 +286,7 @@ async function promoteWaitlist(matchId) {
     });
     for (const id of promoted) {
       await chatService.postSystem(m.group, `${resolve(id).name} entra dalla lista d'attesa per ${day}.`);
+      await activityService.record(m.group, 'promozione', { target: id, match: matchId });
     }
   }
   return promoted;
@@ -386,7 +389,10 @@ async function respond(match, user, response) {
   }
 
   const day = dayOf(updated);
-  if (outcome === 'ci_sono') await chatService.postSystem(match.group, `${user.name} ci sarà alla partita di ${day}.`);
+  if (outcome === 'ci_sono') {
+    await chatService.postSystem(match.group, `${user.name} ci sarà alla partita di ${day}.`);
+    await activityService.record(match.group, 'iscrizione', { actor: uid, match: match._id });
+  }
   if (outcome === 'attesa') await chatService.postSystem(match.group, `${user.name} è in lista d'attesa per ${day}.`);
   if (freedSlot) await chatService.postSystem(match.group, `${user.name} non ci sarà più ${day}: si libera un posto.`);
 

@@ -7,4 +7,6 @@ const postMessage = z.object({ text: z.string().trim().min(1).max(1000) }).stric
 const reaction = z.object({ emoji: z.string().min(1).max(8) }).strict();
 const listNotifications = z.object({ unread: z.enum(['true', 'false']).default('false'), limit: int(1, 100).default(30) });
 
-module.exports = { listMessages, postMessage, reaction, listNotifications };
+const listActivity = z.object({ before: objectId.optional(), limit: int(1, 50).default(20) });
+
+module.exports = { listActivity, listMessages, postMessage, reaction, listNotifications };

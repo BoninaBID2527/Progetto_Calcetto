@@ -1,7 +1,7 @@
 'use strict';
 
-const { Match, Rating } = require('../models');
-const { PLAYED_STATUSES, DEFAULTS } = require('../config/appConfig');
+const { DEFAULTS } = require('../config/appConfig');
+const statsEngine = require('./statsEngine');
 const { userResolver } = require('./dto');
 const nicknameService = require('./nicknameService');
 
@@ -179,27 +179,7 @@ function computeRankings({ matches, ratings, members, minMatches = DEFAULTS.minM
 /** Carica i dati del gruppo, applica il periodo e risolve gli utenti. */
 async function groupRankings(group, period = 'sempre', now = new Date()) {
   const since = periodStart(period, now);
-  const filter = { group: group._id, status: { $in: PLAYED_STATUSES }, result: { $ne: null } };
-  if (since) filter.startsAt = { $gte: since };
-  const raw = await Match.find(filter).sort({ startsAt: 1 }).lean();
-  const matches = raw
-    .filter((m) => m.teams)
-    .map((m) => ({
-      id: String(m._id),
-      startsAt: m.startsAt,
-      teams: { a: m.teams.a.players.map(String), b: m.teams.b.players.map(String) },
-      scoreA: m.result.scoreA,
-      scoreB: m.result.scoreB,
-      scorers: (m.result.scorers || []).map((s) => ({ user: String(s.user), goals: s.goals })),
-      mvp: m.voting?.closed ? (m.voting.mvp || []).map(String) : [],
-    }));
-  const ratings = matches.length
-    ? (await Rating.find({ match: { $in: matches.map((m) => m.id) } }).lean()).map((r) => ({
-        match: String(r.match),
-        ratee: String(r.ratee),
-        score: r.score,
-      }))
-    : [];
+  const { matches, ratings } = await statsEngine.loadPlayed(group._id, { since });
   const members = group.members.map((m) => ({ userId: String(m.user), joinedAt: m.joinedAt }));
   const { rankings } = computeRankings({ matches, ratings, members, minMatches: group.settings.minMatchesForRanking });
 

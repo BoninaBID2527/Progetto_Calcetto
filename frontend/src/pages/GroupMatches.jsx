@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import Icon from '../components/Icon';
 import MatchCard from '../components/MatchCard';
+import ResultRow from '../components/ResultRow';
 import { CardSkeleton, EmptyState, ErrorState } from '../components/ui';
 import { api } from '../api/client';
 import { useResource } from '../hooks/useResource';
@@ -106,11 +107,11 @@ export default function GroupMatches() {
           <section className="stack" aria-labelledby="past-title">
             <h2 id="past-title">Già giocate</h2>
             {data.past.length ? (
-              <div className="grid">
+              <ol className="results-list">
                 {data.past.map((m) => (
-                  <MatchCard key={m.id} match={m} userId={user.id} />
+                  <ResultRow key={m.id} match={m} />
                 ))}
-              </div>
+              </ol>
             ) : (
               <p className="muted">Qui compariranno le partite giocate, con risultato, MVP e pagella.</p>
             )}

@@ -2,6 +2,8 @@
 
 const groupService = require('../services/groupService');
 const nicknameService = require('../services/nicknameService');
+const dashboardService = require('../services/dashboardService');
+const activityService = require('../services/activityService');
 
 const list = async (req, res) => res.json({ groups: await groupService.listMine(req.user) });
 const create = async (req, res) => res.status(201).json({ group: await groupService.create(req.user, req.body) });
@@ -38,7 +40,12 @@ const replaceNickname = async (req, res) =>
 const removeNickname = async (req, res) =>
   res.json({ nickname: await nicknameService.remove(req.group, req.user, req.params.nicknameId) });
 
+const dashboard = async (req, res) => res.json({ dashboard: await dashboardService.forUser(req.group, req.user) });
+const activity = async (req, res) => res.json(await activityService.list(req.group._id, req.validQuery));
+
 module.exports = {
+  dashboard,
+  activity,
   list,
   create,
   preview,

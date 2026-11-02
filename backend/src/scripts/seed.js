@@ -20,6 +20,7 @@ const { hashPassword } = require('../services/authService');
 const { balance } = require('../services/teamService');
 const { appConfig, DEFAULTS } = require('../config/appConfig');
 const { generateInviteCode } = require('../utils/helpers');
+const { backfillActivity } = require('./backfill');
 
 const PASSWORD = 'calcetto2026';
 const DAY = 86_400_000;
@@ -331,9 +332,11 @@ async function main() {
   await connectDatabase(config.mongoUri);
   const { byKey, created } = await ensureUsers();
   const summary = await seedGroupContent(byKey);
+  // Il feed dei gruppi nasce dagli eventi già salvati (idempotente).
+  summary.activities = await backfillActivity();
   console.log(`Seed completato su ${config.mongoUri}`);
   console.log(`  utenti creati: ${created} (già presenti: ${USERS.length - created})`);
-  console.log(`  gruppi creati: ${summary.groups}, partite: ${summary.matches}, messaggi: ${summary.messages}`);
+  console.log(`  gruppi creati: ${summary.groups}, partite: ${summary.matches}, messaggi: ${summary.messages}, voci del feed: ${summary.activities}`);
   console.log(`  password di tutti gli account: ${PASSWORD}`);
   console.log('  account admin: marco@calcetto.test');
   await disconnectDatabase();

@@ -9,13 +9,14 @@ export function navigationFor(group, { unreadNotifications = 0 } = {}) {
   const canOrganize = group && (group.settings.organizers === 'tutti' || group.myRole === 'admin');
 
   const items = {
+    home: { label: 'Home', icon: 'home', to: inGroup('', '/gruppi'), end: true },
     partite: { label: 'Partite', icon: 'calendar', to: inGroup('/partite') },
     classifiche: { label: 'Classifiche', icon: 'trophy', to: inGroup('/classifiche') },
     chat: { label: 'Chat', icon: 'chat', to: inGroup('/chat'), badge: group?.unreadCount || 0, badgeLabel: `${group?.unreadCount || 0} messaggi non letti` },
     membri: { label: 'Membri', icon: 'users', to: inGroup('/membri') },
     notifiche: { label: 'Notifiche', icon: 'bell', to: '/notifiche', badge: unreadNotifications, badgeLabel: `${unreadNotifications} notifiche non lette` },
     profilo: { label: 'Profilo', icon: 'user', to: '/profilo' },
-    gruppi: { label: 'Tutti i gruppi', icon: 'home', to: '/gruppi', end: true },
+    gruppi: { label: 'Tutti i gruppi', icon: 'shield', to: '/gruppi', end: true },
   };
 
   const create = canOrganize
@@ -23,13 +24,13 @@ export function navigationFor(group, { unreadNotifications = 0 } = {}) {
     : [{ label: group ? 'Apri le partite del gruppo' : 'Crea o entra in un gruppo', short: group ? 'Partite' : 'Gruppi', icon: 'users', to: group ? `${base}/partite` : '/gruppi' }];
 
   return {
-    home: group ? `${base}/partite` : '/gruppi',
+    home: group ? base : '/gruppi',
     create,
-    bottom: [items.partite, items.classifiche, items.chat],
-    more: [items.membri, items.notifiche, items.profilo, items.gruppi],
+    bottom: [items.home, items.partite, items.chat],
+    more: [items.classifiche, items.membri, items.notifiche, items.profilo, items.gruppi],
     moreBadge: unreadNotifications,
     sections: [
-      { title: group ? group.name : 'Gruppo', items: [items.partite, items.classifiche, items.chat, items.membri] },
+      { title: group ? group.name : 'Gruppo', items: [items.home, items.partite, items.classifiche, items.chat, items.membri] },
       { title: 'Tu', items: [items.notifiche, items.profilo, items.gruppi] },
     ],
   };

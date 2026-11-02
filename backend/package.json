@@ -12,7 +12,8 @@
     "dev": "node --watch src/server.js",
     "seed": "node src/scripts/seed.js",
     "test": "jest --runInBand",
-    "db:lite": "node dev/mongo-lite/cli.js"
+    "db:lite": "node dev/mongo-lite/cli.js",
+    "migrate": "node src/scripts/migrate.js"
   },
   "jest": {
     "testEnvironment": "node",

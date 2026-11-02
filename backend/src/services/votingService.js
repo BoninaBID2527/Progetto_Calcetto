@@ -11,6 +11,7 @@ const chatService = require('./chatService');
 const matchService = require('./matchService');
 const realtime = require('./realtime');
 const { playersOf, teamOf } = require('./teamService');
+const activityService = require('./activityService');
 
 const HOUR = 3_600_000;
 
@@ -75,6 +76,12 @@ async function setResult(match, user, { scoreA, scoreB, scorers }) {
       group: match.group,
     });
     await chatService.postSystem(match.group, `Finale a ${field}: ${line}. Votazioni aperte per MVP e terzo tempo!`);
+    await activityService.record(match.group, 'risultato', {
+      actor: user._id,
+      match: match._id,
+      data: { scoreA, scoreB, teamA: updated.teams.a.name, teamB: updated.teams.b.name },
+      key: `risultato:${match._id}`,
+    });
   } else {
     await chatService.postSystem(match.group, `Risultato corretto: ${line}.`);
   }
@@ -106,6 +113,9 @@ async function closeMvp(matchId) {
     ? `${names.length > 1 ? 'MVP condiviso' : 'MVP della serata'}: ${names.join(' e ')} (${top} ${top === 1 ? 'voto' : 'voti'}).`
     : "Votazione MVP chiusa senza voti: stavolta nessuna stella.";
   await chatService.postSystem(updated.group, text);
+  if (winners.length) {
+    await activityService.record(updated.group, 'mvp', { target: winners[0], match: matchId, data: { winners, votes: top }, key: `mvp:${matchId}` });
+  }
   return true;
 }
 
@@ -128,6 +138,9 @@ async function closePrize(matchId) {
     text += loser ? ` Il primo giro lo offrono le ${updated.teams[loser].name}.` : ' Pareggio: si fa alla romana.';
   }
   await chatService.postSystem(updated.group, text);
+  if (winners.length) {
+    await activityService.record(updated.group, 'premio', { match: matchId, data: { winners, labels }, key: `premio:${matchId}` });
+  }
   return true;
 }
 

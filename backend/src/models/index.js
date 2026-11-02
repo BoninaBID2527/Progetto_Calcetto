@@ -10,6 +10,7 @@ module.exports = {
   Match: require('./Match'),
   Message: require('./Message'),
   Notification: require('./Notification'),
+  Activity: require('./Activity'),
   MvpVote,
   Rating,
   PrizeVote,

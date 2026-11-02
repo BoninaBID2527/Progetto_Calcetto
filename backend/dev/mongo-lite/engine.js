@@ -300,6 +300,12 @@ function matchOperators(candidates, ops) {
       }
       case '$options':
         break;
+      case '$type': {
+        const ALIASES = { int: 'number', long: 'number', double: 'number', decimal: 'number', number: 'number', string: 'string', bool: 'bool', date: 'date', objectId: 'objectId', array: 'array', object: 'object', null: 'null', regex: 'regex', binData: 'binData' };
+        const wanted = (Array.isArray(arg) ? arg : [arg]).map((t) => ALIASES[t] || t);
+        if (!candidates.some((c) => wanted.includes(bsonType(c)))) return false;
+        break;
+      }
       case '$not':
         if (isOperatorObject(arg) ? matchOperators(candidates, arg) : matchEquality(candidates, arg)) return false;
         break;

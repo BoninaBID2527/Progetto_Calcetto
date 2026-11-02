@@ -25,6 +25,8 @@ const inGroup = [validIds('groupId'), loadGroup];
 const admin = [...inGroup, requireGroupAdmin];
 
 router.get('/:groupId', inGroup, ctrl.show);
+router.get('/:groupId/dashboard', inGroup, ctrl.dashboard);
+router.get('/:groupId/activity', inGroup, validate({ query: cv.listActivity }), ctrl.activity);
 router.patch('/:groupId', admin, validate({ body: gv.updateGroup }), ctrl.update);
 router.post('/:groupId/invite-code', admin, ctrl.regenerateCode);
 router.get('/:groupId/members', inGroup, ctrl.members);

@@ -8,6 +8,7 @@ import Groups from './pages/Groups';
 import JoinByLink from './pages/JoinByLink';
 import GroupLayout from './pages/GroupLayout';
 import GroupMatches from './pages/GroupMatches';
+import Dashboard from './pages/Dashboard';
 import NewMatch from './pages/NewMatch';
 import MatchDetail from './pages/MatchDetail';
 import GroupRankings from './pages/GroupRankings';
@@ -52,7 +53,7 @@ function Home() {
   if (!ready) return <Splash />;
   if (!user) return <Landing />;
   if (!groups) return <Splash />;
-  return <Navigate to={activeGroup ? `/gruppi/${activeGroup.id}/partite` : '/gruppi'} replace />;
+  return <Navigate to={activeGroup ? `/gruppi/${activeGroup.id}` : '/gruppi'} replace />;
 }
 
 export default function App() {
@@ -65,7 +66,7 @@ export default function App() {
         <Route path="/gruppi" element={<Groups />} />
         <Route path="/entra/:code" element={<JoinByLink />} />
         <Route path="/gruppi/:groupId" element={<GroupLayout />}>
-          <Route index element={<Navigate to="partite" replace />} />
+          <Route index element={<Dashboard />} />
           <Route path="partite" element={<GroupMatches />} />
           <Route path="nuova-partita" element={<NewMatch />} />
           <Route path="classifiche" element={<GroupRankings />} />

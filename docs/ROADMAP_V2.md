@@ -9,7 +9,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M0 | Audit del repository e roadmap | ✅ |
 | M1 | Architettura dei nuovi modelli e contratti API (docs/ARCHITETTURA.md) | ✅ |
 | M2 | Design system NIGHT LEAGUE: token, font, Lucide, Motion, componenti, shell responsive | ✅ |
-| M3 | Dashboard "Spogliatoio" con hero MATCHDAY, azioni rapide, feed attività; restyling gruppi e partite | ⏳ |
+| M3 | Dashboard "Spogliatoio" con hero MATCHDAY, azioni rapide, feed attività; restyling gruppi e partite | ✅ |
 | M4 | BONCALL: convocazioni, risposte atomiche, conversione idempotente, promemoria, notifiche in-app | ⏳ |
 | M5 | PWA e Web Push (service worker, VAPID, subscription, preferenze, fasce silenziose) | ⏳ |
 | M6 | BONCARD e BONRATING (attributi, overall, edizioni, progressione, esportazione PNG) | ⏳ |
@@ -130,3 +130,10 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Shell: navigazione da un'unica mappa (`layouts/navigation.js`), sidebar a sezioni, barra in basso con "Crea" e "Altro" in bottom sheet, transizione tra pagine con Motion, preferenza "animazioni ridotte" nel profilo (salvata in `settings.motion`) oltre a `prefers-reduced-motion`.
 - Test: 101 backend verdi; build di produzione riuscita; screenshot 390/1280 di partite e scheda partita senza overflow.
 - Non verificato in questa milestone: axe-core sulle nuove schermate (si rifà in M16).
+
+### M3 — Dashboard "Spogliatoio" (✅)
+- Backend: modello `Activity` con chiave di idempotenza (indice unico parziale), `activityService` (registra e trasmette `activity:new`), `statsEngine` (motore statistico unico, ora usato anche dalle classifiche), `dashboardService`; rotte `GET /groups/:id/dashboard` e `GET /groups/:id/activity?before=&limit=`. Il feed nasce da eventi reali: nuova partita, iscrizione, ingresso dalla lista d'attesa, risultato, MVP, premio, nuovo membro.
+- `npm run migrate`: ricostruisce il feed dai dati già salvati in ordine cronologico, idempotente (seconda esecuzione: 0 voci). Il seed lo usa a sua volta.
+- Emulatore: aggiunto `$type` (serve agli indici parziali), con `tests/mongoLite.test.js`.
+- Frontend: `/gruppi/:id` è la dashboard (hero MATCHDAY con countdown, posti, convocati e "Ci sono"; azioni rapide; votazioni da fare; il tuo campionato con forma V/P/S e avviso quando il campione è piccolo; posizioni in classifica; feed animato in tempo reale; prossime partite). Partite passate in formato "risultati" compatto. Navigazione con Home.
+- Test: 109 backend verdi (nuovi `dashboard.test.js`, `mongoLite.test.js`), build ok, screenshot 390/1280 senza overflow.

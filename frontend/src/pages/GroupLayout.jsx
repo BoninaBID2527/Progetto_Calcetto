@@ -6,6 +6,7 @@ import { api } from '../api/client';
 import { useResource } from '../hooks/useResource';
 
 const TABS = [
+  { to: '', label: 'Spogliatoio', icon: 'dashboard', end: true },
   { to: 'partite', label: 'Partite', icon: 'calendar' },
   { to: 'classifiche', label: 'Classifiche', icon: 'trophy' },
   { to: 'chat', label: 'Chat', icon: 'chat' },
@@ -62,7 +63,7 @@ export default function GroupLayout() {
       </header>
       <nav className="tabs" aria-label="Sezioni del gruppo">
         {TABS.map((t) => (
-          <NavLink key={t.to} to={t.to} className="tab">
+          <NavLink key={t.label} to={t.to} className="tab" end={t.end}>
             <Icon name={t.icon} />
             {t.label}
             {t.to === 'chat' && group.unreadCount > 0 && <span className="badge-count" aria-label={`${group.unreadCount} non letti`}>{group.unreadCount}</span>}

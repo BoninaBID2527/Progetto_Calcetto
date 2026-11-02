@@ -8,6 +8,7 @@ const { publicUser } = require('./dto');
 const nicknameService = require('./nicknameService');
 const chatService = require('./chatService');
 const realtime = require('./realtime');
+const activityService = require('./activityService');
 
 function summary(group, userId, extra = {}) {
   const me = group.members.find((m) => sameId(m.user, userId));
@@ -93,6 +94,7 @@ async function join(user, code) {
   await chatService.postSystem(group._id, `${user.name} si unisce al gruppo. Benvenuto in squadra!`);
   // Il messaggio sul proprio ingresso non deve risultare "non letto".
   await chatService.markRead(updated, user);
+  await activityService.record(group._id, 'membro_entrato', { actor: user._id });
   realtime.toGroup(group._id, 'group:updated', { groupId: String(group._id), part: 'members' });
   return summary(updated, user._id, { unreadCount: 0 });
 }
