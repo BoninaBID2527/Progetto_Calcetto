@@ -91,6 +91,8 @@ async function join(user, code) {
   if (!updated) throw conflict('Fai già parte di questo gruppo.');
   realtime.joinGroupRoom(user._id, group._id);
   await chatService.postSystem(group._id, `${user.name} si unisce al gruppo. Benvenuto in squadra!`);
+  // Il messaggio sul proprio ingresso non deve risultare "non letto".
+  await chatService.markRead(updated, user);
   realtime.toGroup(group._id, 'group:updated', { groupId: String(group._id), part: 'members' });
   return summary(updated, user._id, { unreadCount: 0 });
 }
