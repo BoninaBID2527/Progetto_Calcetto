@@ -16,7 +16,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M7 | MATCHDAY e formazioni, Bilancia migliorato, locandina esportabile | ✅ |
 | M8 | Rivalità | ✅ |
 | M9 | Stagioni, nuove classifiche, Hall of Fame | ✅ |
-| M10 | Premi partita e achievement | ⏳ |
+| M10 | Premi partita e achievement | ✅ |
 | M11 | Club personalizzati (stemma, colori, maglie, copertina) | ⏳ |
 | M12 | Calendario intelligente e partite ricorrenti | ⏳ |
 | M13 | Cassa del gruppo (registro dichiarato/verificato) | ⏳ |
@@ -181,3 +181,11 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Hall of Fame (`GET /groups/:id/hall-of-fame`): vincitori (più forti, MVP, bomber, più vincenti) di ogni stagione chiusa con partite, record assoluti (più gol in una partita, vittoria più larga, serie di vittorie, presenze, MVP, capocannoniere, miglior voto medio con minimo partite), più premiati (MVP + premi di partita + titoli stagionali). Dove i dati non bastano: `available: false`, mai valori inventati.
 - Frontend: selettore periodo (sempre / mese / stagione corrente / stagioni passate), frecce di variazione accessibili, 12 schede con requisito e motivo dell'indisponibilità, pagina Hall of Fame (`/gruppi/:id/hall-of-fame`, voce nel menu), impostazioni admin di stagione (modalità, mese di inizio, stagioni personalizzate).
 - Test: 164 backend verdi (13 nuovi in `seasons.test.js`: nuove classifiche, modalità, sovrapposizioni, permessi, confronto con la precedente, Hall of Fame vuota e piena, accesso dei non membri). Build ok, verifica visiva a 1280 px senza errori in console.
+
+### M10 — Premi partita e achievement (✅)
+- Premi di partita opzionali: `Group.settings.awards` (portiere, difensore, bomber, sorpresa, ironico con nome scelto dall'admin), tutti spenti di default e attivabili solo dall'admin. Al primo risultato la partita memorizza i premi attivi (`Match.awards`) e i vincitori (`Match.awardWinners`, già letto dal motore statistico). Il **bomber** è automatico dai marcatori (pari merito inclusi, segue le correzioni del risultato, vuoto se non ci sono marcatori); gli altri si decidono con **voto anonimo** (`AwardVote`, unico per partita-votante-premio, niente voto a sé stessi, solo chi ha giocato) o con **assegnazione dell'organizzatore**. I premi a voto si chiudono insieme all'MVP, una sola volta (aggiornamento atomico); l'MVP non si chiude in anticipo finché mancano voti ai premi. Annuncio idempotente: messaggio in chat, voce del feed (`premio_partita`) e notifica ai vincitori.
+- Rotte: `GET /matches/:mid/awards`, `POST /matches/:mid/awards/:key/vote`, `POST /matches/:mid/awards/:key/assign` (organizzatore/admin). Valgono per le partite il cui risultato viene inserito dopo l'attivazione.
+- Achievement (`Achievement`, indice unico utente-gruppo-chiave, assegnati solo dal backend): prima partita, 10/25/50 presenze, primo gol, 10/25 gol, primo MVP, 5 MVP, tris e serie da 5 vittorie, fedeltà (6 mesi nel gruppo e 10 presenze). Ricalcolati dopo ogni risultato e chiusura MVP; notifica e feed solo per traguardi recenti (3 giorni), quelli arretrati si registrano con la data della partita e senza avvisi. `GET /groups/:id/players/:uid/achievements` con avanzamento reale. `npm run migrate` e il seed ricostruiscono lo storico (idempotente).
+- Frontend: pannello "Premi della serata" nella partita (voto, assegnazione, premiazione animata con Motion, statica con animazioni ridotte dal profilo), traguardi nella BONCARD, impostazioni admin dei premi, voci nel feed.
+- Test: 176 backend verdi (12 nuovi in `awards.test.js`: attivazione e permessi, bomber, voto, chiusura e pari merito, idempotenza, assegnazione, achievement con concorrenza, storico).
+- Limite: gli "effetti" di premiazione sono animazioni leggere (nessun suono né schermata a pieno schermo); disattivabili con "animazioni ridotte" del profilo.

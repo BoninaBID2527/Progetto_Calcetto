@@ -3,6 +3,7 @@ import { Link, useOutletContext, useParams } from 'react-router-dom';
 import Icon from '../components/Icon';
 import PlayerCard from '../components/player/PlayerCard';
 import { exportCardPng, shareOrDownload } from '../components/player/exportCard';
+import Achievements from '../components/player/Achievements';
 import LineChart from '../components/charts/LineChart';
 import FieldBadge from '../components/FieldBadge';
 import { Button, Card, CardHeader, CardSkeleton, ErrorState, SegmentedControl, StatCard } from '../components/ui';
@@ -79,6 +80,7 @@ export default function PlayerProfile() {
   const [scope, setScope] = useState('gruppo');
   const [exporting, setExporting] = useState(false);
   const card = useResource(() => api(`/groups/${group.id}/players/${userId}/card?scope=${scope}`).then((r) => r.card), [group.id, userId, scope]);
+  const ach = useResource(() => api(`/groups/${group.id}/players/${userId}/achievements`), [group.id, userId]);
   const prog = useResource(() => api(`/groups/${group.id}/players/${userId}/progression`).then((r) => r.progression), [group.id, userId]);
 
   const exportPng = async () => {
@@ -142,6 +144,7 @@ export default function PlayerProfile() {
         <div className="stack">
           <Breakdown card={c} self={self} />
           <Editions list={c.editions} />
+          {scope === 'gruppo' && <Achievements data={ach.data} />}
         </div>
       </div>
 

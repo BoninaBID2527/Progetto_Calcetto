@@ -9,6 +9,7 @@ const ACTIVITY_TYPES = [
   'risultato',
   'mvp',
   'premio',
+  'premio_partita',
   'membro_entrato',
   'boncall_aperta',
   'boncall_completa',

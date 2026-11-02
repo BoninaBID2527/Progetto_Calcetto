@@ -183,6 +183,56 @@ function InviteCard({ group, isAdmin }) {
   );
 }
 
+const AWARD_ROWS = [
+  { key: 'bomber', label: 'Bomber della serata', hint: 'Automatico: segue i marcatori inseriti.' },
+  { key: 'portiere', label: 'Miglior portiere', hint: 'Voto dei giocatori o scelta dell’organizzatore.' },
+  { key: 'difensore', label: 'Miglior difensore', hint: 'Voto dei giocatori o scelta dell’organizzatore.' },
+  { key: 'sorpresa', label: 'Sorpresa della serata', hint: 'Voto dei giocatori o scelta dell’organizzatore.' },
+];
+
+/** Premi di partita facoltativi: tutti spenti finché un admin non li attiva. */
+function AwardSettings({ settings, update, error }) {
+  const awards = settings.awards || {};
+  const [label, setLabel] = useState(awards.ironico?.label || 'Premio ironico');
+  const set = (patch) => update({ awards: patch });
+  return (
+    <fieldset className="field stack" style={{ border: 0, padding: 0, margin: 0 }}>
+      <legend className="label">Premi di partita</legend>
+      <p className="muted">Si assegnano dopo il risultato. Nessun premio è obbligatorio e nessuna prestazione viene inventata.</p>
+      {AWARD_ROWS.map((a) => (
+        <label key={a.key} className="check-row">
+          <input type="checkbox" checked={Boolean(awards[a.key])} onChange={(e) => set({ [a.key]: e.target.checked })} />
+          <span>
+            <strong>{a.label}</strong>
+            <span className="player-sub">{a.hint}</span>
+          </span>
+        </label>
+      ))}
+      <label className="check-row">
+        <input type="checkbox" checked={Boolean(awards.ironico?.enabled)} onChange={(e) => set({ ironico: { enabled: e.target.checked } })} />
+        <span>
+          <strong>Premio ironico</strong>
+          <span className="player-sub">Un riconoscimento scherzoso, mai offensivo, con il nome che scegli tu.</span>
+        </span>
+      </label>
+      {awards.ironico?.enabled && (
+        <FormField label="Nome del premio ironico" error={error?.fields?.['settings.awards.ironico.label']}>
+          {(p) => (
+            <input
+              {...p}
+              className="input"
+              maxLength={30}
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              onBlur={() => label.trim().length >= 2 && label !== awards.ironico?.label && set({ ironico: { label: label.trim() } })}
+            />
+          )}
+        </FormField>
+      )}
+    </fieldset>
+  );
+}
+
 const MONTH_NAMES = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
 
 /** Modalità di stagione, mese di inizio e stagioni personalizzate. Lo storico non si cancella mai. */
@@ -311,6 +361,7 @@ function SettingsCard({ group }) {
 
   const update = async (patch) => {
     const next = { ...settings, ...patch };
+    if (patch.awards) next.awards = { ...settings.awards, ...patch.awards, ironico: { ...settings.awards?.ironico, ...patch.awards.ironico } };
     setSettings(next);
     const { extraPrizeOptions, ...rest } = patch;
     await save({ settings: extraPrizeOptions ? { extraPrizeOptions: extraPrizeOptions.map(({ label, emoji }) => ({ label, emoji })) } : rest });
@@ -346,6 +397,7 @@ function SettingsCard({ group }) {
         )}
       </FormField>
       <SeasonSettings group={group} settings={settings} update={update} />
+      <AwardSettings settings={settings} update={update} error={error} />
       <div className="field">
         <span className="label">Chi perde offre il primo giro</span>
         <Segmented

@@ -7,12 +7,18 @@
 const config = require('../config/env');
 const { connectDatabase, disconnectDatabase } = require('../db');
 const { backfillActivity } = require('./backfill');
+const { Group } = require('../models');
+const achievementService = require('../services/achievementService');
 
 async function main() {
   await connectDatabase(config.mongoUri);
   const activities = await backfillActivity();
+  // Traguardi dallo storico: registrati con la data della partita, senza notifiche.
+  let achievements = 0;
+  for (const g of await Group.find().select('_id').lean()) achievements += await achievementService.evaluateGroup(g._id, { notify: false });
   console.log(`Migrazione completata su ${config.mongoUri}`);
   console.log(`  voci del feed ricostruite dai dati esistenti: ${activities}`);
+  console.log(`  traguardi (achievement) ricostruiti dallo storico: ${achievements}`);
   await disconnectDatabase();
 }
 

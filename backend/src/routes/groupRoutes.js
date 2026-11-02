@@ -51,6 +51,7 @@ router.get('/:groupId/polls', inGroup, validate({ query: pv.list }), pollCtrl.li
 router.post('/:groupId/polls', inGroup, validate({ body: pv.createPoll }), pollCtrl.create);
 router.get('/:groupId/players/:userId/card', inGroup, validIds('userId'), validate({ query: mv.cardScope }), playerCtrl.card);
 router.get('/:groupId/players/:userId/progression', inGroup, validIds('userId'), playerCtrl.progression);
+router.get('/:groupId/players/:userId/achievements', inGroup, validIds('userId'), playerCtrl.achievements);
 router.get('/:groupId/rivalries', inGroup, rivalryCtrl.list);
 router.post('/:groupId/rivalries', inGroup, validate({ body: gv.proposeRivalry }), rivalryCtrl.propose);
 router.get('/:groupId/rivalries/:userId', inGroup, validIds('userId'), validate({ query: gv.versusQuery }), rivalryCtrl.detail);

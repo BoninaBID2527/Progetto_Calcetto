@@ -56,6 +56,8 @@ const ratings = z
   .strict();
 const prizeVote = z.object({ option: z.string().trim().min(1).max(40) }).strict();
 
+const awardVote = z.object({ nominee: z.string().regex(/^[a-f\d]{24}$/i, 'Identificativo non valido.') }).strict();
+const awardAssign = z.object({ userIds: z.array(z.string().regex(/^[a-f\d]{24}$/i, 'Identificativo non valido.')).min(1).max(3) }).strict();
 const rankings = z.object({ period: z.enum(['mese', 'stagione', 'sempre']).default('sempre'), season: z.string().trim().min(1).max(40).optional() });
 const cardScope = z.object({ scope: z.enum(['gruppo', 'carriera']).default('gruppo') });
 
@@ -74,4 +76,6 @@ module.exports = {
   prizeVote,
   rankings,
   cardScope,
+  awardVote,
+  awardAssign,
 };

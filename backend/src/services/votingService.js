@@ -12,6 +12,8 @@ const matchService = require('./matchService');
 const realtime = require('./realtime');
 const { playersOf, teamOf } = require('./teamService');
 const activityService = require('./activityService');
+const awardsService = require('./awardsService');
+const achievementService = require('./achievementService');
 
 const HOUR = 3_600_000;
 
@@ -53,6 +55,7 @@ async function setResult(match, user, { scoreA, scoreB, scorers }) {
     const group = await Group.findById(match.group).lean();
     set.voting = { opensAt: now, closesAt: new Date(now.getTime() + DEFAULTS.votingHours * HOUR), closed: false, mvp: [] };
     set.prizePoll = { options: [...appConfig.prizeOptions, ...(group.settings.extraPrizeOptions || [])], closed: false, winners: [] };
+    Object.assign(set, awardsService.initial(group, { result: set.result }));
   }
   const updated = await Match.findOneAndUpdate({ _id: match._id, status: match.status }, { $set: set }, { new: true }).lean();
   if (!updated) throw conflict('La partita è stata modificata nel frattempo. Ricarica e riprova.');
@@ -84,7 +87,9 @@ async function setResult(match, user, { scoreA, scoreB, scorers }) {
     });
   } else {
     await chatService.postSystem(match.group, `Risultato corretto: ${line}.`);
+    await awardsService.refreshAutomatic(match._id);
   }
+  await achievementService.evaluateSafely(match.group);
   return matchService.broadcast(match._id);
 }
 
@@ -116,6 +121,8 @@ async function closeMvp(matchId) {
   if (winners.length) {
     await activityService.record(updated.group, 'mvp', { target: winners[0], match: matchId, data: { winners, votes: top }, key: `mvp:${matchId}` });
   }
+  await awardsService.close(matchId);
+  await achievementService.evaluateSafely(updated.group);
   return true;
 }
 
@@ -210,7 +217,7 @@ async function castMvp(match, user, mvpUserId) {
     throw err;
   }
   const { match: fresh, mvpVotes } = await notifyVotingChange(match._id);
-  if (mvpVotes >= playersOf(fresh).length && (await closeMvp(match._id))) await matchService.broadcast(match._id);
+  if (mvpVotes >= playersOf(fresh).length && !(await awardsService.hasPendingVotes(fresh)) && (await closeMvp(match._id))) await matchService.broadcast(match._id);
   return state(match._id, user);
 }
 

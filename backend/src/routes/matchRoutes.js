@@ -11,6 +11,10 @@ const v = require('../validators/matchValidators');
 const router = Router();
 router.use(requireAuth);
 
+const { KEYS: AWARD_KEYS } = require('../services/awardsService');
+const { badRequest } = require('../utils/AppError');
+
+const validAwardKey = (req, res, next) => (AWARD_KEYS.includes(req.params.key) ? next() : next(badRequest('Premio non valido.')));
 const inMatch = [validIds('matchId'), loadMatch];
 const manager = [...inMatch, requireMatchManager];
 
@@ -29,6 +33,9 @@ router.post('/:matchId/mvp-vote', inMatch, validate({ body: v.mvpVote }), post.m
 router.post('/:matchId/ratings', inMatch, validate({ body: v.ratings }), post.ratings);
 router.post('/:matchId/prize-vote', inMatch, validate({ body: v.prizeVote }), post.prizeVote);
 router.post('/:matchId/voting/close', manager, post.closeVoting);
+router.get('/:matchId/awards', inMatch, post.awards);
+router.post('/:matchId/awards/:key/vote', inMatch, validAwardKey, validate({ body: v.awardVote }), post.awardVote);
+router.post('/:matchId/awards/:key/assign', manager, validAwardKey, validate({ body: v.awardAssign }), post.awardAssign);
 router.get('/:matchId/report', inMatch, post.report);
 router.get('/:matchId/matchday', inMatch, post.matchday);
 

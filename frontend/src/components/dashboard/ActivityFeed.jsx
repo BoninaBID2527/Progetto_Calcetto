@@ -12,6 +12,7 @@ const ICON = {
   risultato: 'flag',
   mvp: 'star',
   premio: 'mug',
+  premio_partita: 'award',
   membro_entrato: 'users',
   boncall_aperta: 'boncall',
   boncall_completa: 'check-circle',
@@ -37,6 +38,10 @@ function describe(a) {
       return <><PlayerName user={a.target} /> è l'MVP della serata{a.data.winners?.length > 1 && ' (condiviso)'}</>;
     case 'premio':
       return <>Terzo tempo: vince {a.data.labels?.join(' e ')}</>;
+    case 'premio_partita':
+      return <>{a.data.label}: <PlayerName user={a.target} />{a.data.winners?.length > 1 && ` e altri ${a.data.winners.length - 1}`}</>;
+    case 'achievement':
+      return <><PlayerName user={a.target} /> ha sbloccato «{a.data.label}»</>;
     case 'membro_entrato':
       return <><PlayerName user={a.actor} /> è entrato nel gruppo</>;
     default:

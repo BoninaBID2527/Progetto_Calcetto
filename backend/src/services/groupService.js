@@ -26,6 +26,13 @@ function summary(group, userId, extra = {}) {
       minMatchesForRanking: group.settings.minMatchesForRanking,
       loserPaysFirstRound: group.settings.loserPaysFirstRound,
       extraPrizeOptions: group.settings.extraPrizeOptions.map((o) => ({ key: o.key, label: o.label, emoji: o.emoji })),
+      awards: {
+        portiere: Boolean(group.settings.awards?.portiere),
+        difensore: Boolean(group.settings.awards?.difensore),
+        bomber: Boolean(group.settings.awards?.bomber),
+        sorpresa: Boolean(group.settings.awards?.sorpresa),
+        ironico: { enabled: Boolean(group.settings.awards?.ironico?.enabled), label: group.settings.awards?.ironico?.label || 'Premio ironico' },
+      },
       season: { mode: group.settings.season?.mode || 'annuale', startMonth: group.settings.season?.startMonth || 9 },
     },
     createdAt: group.createdAt,
@@ -107,6 +114,12 @@ async function update(group, user, data) {
     const { extraPrizeOptions, ...otherSettings } = settings;
     for (const [k, v] of Object.entries(otherSettings)) {
       if (k === 'season') for (const [sk, sv] of Object.entries(v)) group.settings.season[sk] = sv;
+      else if (k === 'awards') {
+        for (const [ak, av] of Object.entries(v)) {
+          if (ak === 'ironico') for (const [ik, iv] of Object.entries(av)) group.settings.awards.ironico[ik] = iv;
+          else group.settings.awards[ak] = av;
+        }
+      }
       else group.settings[k] = v;
     }
     if (extraPrizeOptions) {

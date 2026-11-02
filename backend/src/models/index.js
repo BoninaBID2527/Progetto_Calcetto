@@ -1,6 +1,6 @@
 'use strict';
 
-const { MvpVote, Rating, PrizeVote } = require('./Vote');
+const { MvpVote, Rating, PrizeVote, AwardVote } = require('./Vote');
 
 module.exports = {
   User: require('./User'),
@@ -15,7 +15,9 @@ module.exports = {
   PushSubscription: require('./PushSubscription'),
   Rivalry: require('./Rivalry'),
   Season: require('./Season'),
+  Achievement: require('./Achievement'),
   MvpVote,
   Rating,
   PrizeVote,
+  AwardVote,
 };

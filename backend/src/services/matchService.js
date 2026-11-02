@@ -72,6 +72,7 @@ function toDto(match, resolve) {
           mvp: (match.voting.mvp || []).map((id) => resolve(id)),
         }
       : null,
+    awards: (match.awards || []).map((a) => ({ key: a.key, label: a.label, mode: a.mode })),
     prizePoll: match.prizePoll
       ? {
           options: match.prizePoll.options.map((o) => ({ key: o.key, label: o.label, emoji: o.emoji })),

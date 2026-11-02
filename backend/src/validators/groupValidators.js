@@ -20,6 +20,16 @@ const settings = z
     minMatchesForRanking: int(1, 50),
     loserPaysFirstRound: z.boolean(),
     extraPrizeOptions: z.array(z.object({ label: trimmed(1, 24), emoji }).strict()).max(5),
+    awards: z
+      .object({
+        portiere: z.boolean(),
+        difensore: z.boolean(),
+        bomber: z.boolean(),
+        sorpresa: z.boolean(),
+        ironico: z.object({ enabled: z.boolean(), label: trimmed(2, 30) }).partial().strict(),
+      })
+      .partial()
+      .strict(),
     season: z.object({ mode: z.enum(['annuale', 'trimestrale', 'mensile', 'personalizzata']), startMonth: int(1, 12) }).partial().strict(),
   })
   .partial()

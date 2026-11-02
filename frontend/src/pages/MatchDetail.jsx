@@ -10,6 +10,7 @@ import TeamsPanel from '../components/match/TeamsPanel';
 import ResultPanel from '../components/match/ResultPanel';
 import VotingPanel from '../components/match/VotingPanel';
 import PrizePanel from '../components/match/PrizePanel';
+import AwardsPanel from '../components/match/AwardsPanel';
 import ReportPanel from '../components/match/ReportPanel';
 import ManagePanel from '../components/match/ManagePanel';
 import { api } from '../api/client';
@@ -217,6 +218,7 @@ export default function MatchDetail() {
           <ResultPanel match={match} canManage={canManage} onUpdated={setMatch} hasReport={Boolean(report)} />
           {voting && <VotingPanel match={match} voting={voting} meId={user.id} onChange={setVoting} />}
           {voting && <PrizePanel match={match} voting={voting} report={report} onChange={setVoting} />}
+          {match.awards?.length > 0 && <AwardsPanel match={match} meId={user.id} canManage={canManage} />}
           {match.status !== 'annullata' && <TeamsPanel match={match} canManage={canManage} onUpdated={setMatch} />}
         </div>
         <div className="stack">

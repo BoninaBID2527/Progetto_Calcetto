@@ -74,6 +74,7 @@ const matchSchema = new Schema(
           closed: { type: Boolean, default: false },
           closedAt: { type: Date, default: null },
           mvp: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+          awardsClosed: { type: Boolean, default: false },
         },
         { _id: false }
       ),
@@ -90,6 +91,15 @@ const matchSchema = new Schema(
         { _id: false }
       ),
       default: null,
+    },
+    // Premi di partita attivi al momento del risultato e relativi vincitori.
+    awards: {
+      type: [new Schema({ key: String, label: String, mode: { type: String, enum: ['voto', 'automatico', 'assegnato'] } }, { _id: false })],
+      default: [],
+    },
+    awardWinners: {
+      type: [new Schema({ key: String, users: [{ type: Schema.Types.ObjectId, ref: 'User' }] }, { _id: false })],
+      default: [],
     },
     reminderSentAt: { type: Date, default: null },
     // Convocazione BONCALL da cui è nata la partita (al massimo una partita per convocazione).

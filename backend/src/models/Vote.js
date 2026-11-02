@@ -45,7 +45,20 @@ const prizeVoteSchema = new Schema(
 );
 prizeVoteSchema.index({ match: 1, voter: 1 }, { unique: true });
 
+// Voto per un premio di partita (miglior portiere, difensore, sorpresa, ironico): anonimo come l'MVP.
+const awardVoteSchema = new Schema(
+  {
+    match: { type: Schema.Types.ObjectId, ref: 'Match', required: true },
+    voter: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    award: { type: String, required: true },
+    nominee: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  },
+  { timestamps: true }
+);
+awardVoteSchema.index({ match: 1, voter: 1, award: 1 }, { unique: true });
+
 module.exports = {
+  AwardVote: model('AwardVote', awardVoteSchema),
   MvpVote: model('MvpVote', mvpVoteSchema),
   Rating: model('Rating', ratingSchema),
   PrizeVote: model('PrizeVote', prizeVoteSchema),

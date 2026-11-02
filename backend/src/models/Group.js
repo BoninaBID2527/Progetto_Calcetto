@@ -36,6 +36,17 @@ const groupSchema = new Schema(
       minMatchesForRanking: { type: Number, default: DEFAULTS.minMatchesForRanking, min: 1, max: 50 },
       loserPaysFirstRound: { type: Boolean, default: false },
       extraPrizeOptions: { type: [prizeOptionSchema], default: [] },
+      // Premi di partita facoltativi, spenti finché un admin non li attiva.
+      awards: {
+        portiere: { type: Boolean, default: false },
+        difensore: { type: Boolean, default: false },
+        bomber: { type: Boolean, default: false },
+        sorpresa: { type: Boolean, default: false },
+        ironico: {
+          enabled: { type: Boolean, default: false },
+          label: { type: String, default: 'Premio ironico', maxlength: 30 },
+        },
+      },
       season: {
         mode: { type: String, enum: ['annuale', 'trimestrale', 'mensile', 'personalizzata'], default: 'annuale' },
         startMonth: { type: Number, min: 1, max: 12, default: 9 },

@@ -21,6 +21,7 @@ const { balance } = require('../services/teamService');
 const { appConfig, DEFAULTS } = require('../config/appConfig');
 const { generateInviteCode } = require('../utils/helpers');
 const { backfillActivity } = require('./backfill');
+const achievementService = require('../services/achievementService');
 
 const PASSWORD = 'calcetto2026';
 const DAY = 86_400_000;
@@ -400,9 +401,12 @@ async function main() {
   // Il feed dei gruppi nasce dagli eventi già salvati (idempotente).
   summary.activities = await backfillActivity();
   summary.polls = await seedPolls(byKey);
+  // Traguardi dallo storico dimostrativo (idempotente, senza notifiche).
+  summary.achievements = 0;
+  for (const g of await Group.find().select('_id').lean()) summary.achievements += await achievementService.evaluateGroup(g._id, { notify: false });
   console.log(`Seed completato su ${config.mongoUri}`);
   console.log(`  utenti creati: ${created} (già presenti: ${USERS.length - created})`);
-  console.log(`  gruppi creati: ${summary.groups}, partite: ${summary.matches}, messaggi: ${summary.messages}, voci del feed: ${summary.activities}, convocazioni: ${summary.polls}`);
+  console.log(`  gruppi creati: ${summary.groups}, partite: ${summary.matches}, messaggi: ${summary.messages}, voci del feed: ${summary.activities}, convocazioni: ${summary.polls}, traguardi: ${summary.achievements}`);
   console.log(`  password di tutti gli account: ${PASSWORD}`);
   console.log('  account admin: marco@calcetto.test');
   await disconnectDatabase();
