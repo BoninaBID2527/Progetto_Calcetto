@@ -4,7 +4,7 @@ import { displayName } from '../utils/format';
 
 const ROLE_ORDER = { portiere: 0, difensore: 1, centrocampista: 2, attaccante: 3 };
 
-/** Righe della formazione: il portiere (se c'è) in porta, gli altri su righe da max 3. */
+/** Righe della formazione: il portiere (se c'è) in porta, gli altri su linee da 2 o 3. */
 function formation(players) {
   const sorted = [...players].sort((a, b) => (ROLE_ORDER[a.preferredRole] ?? 2.5) - (ROLE_ORDER[b.preferredRole] ?? 2.5));
   const rows = [];
@@ -13,7 +13,9 @@ function formation(players) {
     rows.push([sorted[0]]);
     rest = sorted.slice(1);
   }
-  const lines = Math.max(1, Math.ceil(rest.length / 3));
+  // Calcetto: linee da 2 (1-2-2) finché la squadra è piccola, da 3 per i numeri più alti.
+  const perLine = rest.length <= 6 ? 2 : 3;
+  const lines = Math.max(1, Math.ceil(rest.length / perLine));
   const base = Math.floor(rest.length / lines);
   let extra = rest.length % lines;
   let i = 0;
@@ -68,7 +70,7 @@ function Lines({ horizontal }) {
   );
 }
 
-export default function Pitch({ teams, drawing = false }) {
+export default function Pitch({ teams, drawing = false, badges = null }) {
   const { nicknameMode } = useAuth();
   if (!teams) return null;
   const placed = [...positions(teams.a.players, 'a').map((p) => ({ ...p, team: 'a' })), ...positions(teams.b.players, 'b').map((p) => ({ ...p, team: 'b' }))];
@@ -95,7 +97,10 @@ export default function Pitch({ teams, drawing = false }) {
             '--hy': `${p.hy}%`,
           }}
         >
-          <Avatar user={p.player} size={44} />
+          <span className="pitch-avatar">
+            <Avatar user={p.player} size={44} />
+            {badges?.[p.player.id] && <span className="pitch-badge">{badges[p.player.id]}</span>}
+          </span>
           <span className="tag">{displayName(p.player, nicknameMode === 'sostituisci' ? 'sostituisci' : 'accanto')}</span>
         </div>
       ))}

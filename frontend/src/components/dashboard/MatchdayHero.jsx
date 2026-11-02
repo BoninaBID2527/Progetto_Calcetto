@@ -72,7 +72,10 @@ export default function MatchdayHero({ match, userId, onRespond, busy, createTo 
             </span>
           )}
           {mine.response === 'attesa' && <span className="chip chip-orange hero-chip">In lista d'attesa · {mine.queuePosition}°</span>}
-          <Link to={`/partite/${match.id}`} className="btn btn-lg">
+          <Link to={`/partite/${match.id}/matchday`} className="btn btn-lg">
+            <Icon name="zap" /> Matchday
+          </Link>
+          <Link to={`/partite/${match.id}`} className="btn btn-lg btn-ghost">
             Dettagli <Icon name="chevron-right" />
           </Link>
         </div>

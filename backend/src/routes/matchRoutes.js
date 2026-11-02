@@ -30,5 +30,6 @@ router.post('/:matchId/ratings', inMatch, validate({ body: v.ratings }), post.ra
 router.post('/:matchId/prize-vote', inMatch, validate({ body: v.prizeVote }), post.prizeVote);
 router.post('/:matchId/voting/close', manager, post.closeVoting);
 router.get('/:matchId/report', inMatch, post.report);
+router.get('/:matchId/matchday', inMatch, post.matchday);
 
 module.exports = router;

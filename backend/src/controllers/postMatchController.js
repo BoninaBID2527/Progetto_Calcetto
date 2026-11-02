@@ -3,6 +3,7 @@
 const teamService = require('../services/teamService');
 const votingService = require('../services/votingService');
 const rankingService = require('../services/rankingService');
+const matchdayService = require('../services/matchdayService');
 
 const balance = async (req, res) => res.json(await teamService.autoBalance(req.match, { names: req.body?.names }));
 const setTeams = async (req, res) => res.json(await teamService.setManual(req.match, req.body));
@@ -23,6 +24,7 @@ async function report(req, res) {
   res.json({ report: await votingService.report(req.match._id) });
 }
 
+const matchday = async (req, res) => res.json({ matchday: await matchdayService.forMatch(req.match) });
 const rankings = async (req, res) => res.json(await rankingService.groupRankings(req.group, req.validQuery.period));
 
-module.exports = { balance, setTeams, setResult, votingState, mvpVote, ratings, prizeVote, closeVoting, report, rankings };
+module.exports = { matchday, balance, setTeams, setResult, votingState, mvpVote, ratings, prizeVote, closeVoting, report, rankings };

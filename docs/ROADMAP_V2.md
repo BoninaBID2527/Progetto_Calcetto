@@ -13,7 +13,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M4 | BONCALL: convocazioni, risposte atomiche, conversione idempotente, promemoria, notifiche in-app | ✅ |
 | M5 | PWA e Web Push (service worker, VAPID, subscription, preferenze, fasce silenziose) | ✅ |
 | M6 | BONCARD e BONRATING (attributi, overall, edizioni, progressione, esportazione PNG) | ✅ |
-| M7 | MATCHDAY e formazioni, Bilancia migliorato, locandina esportabile | ⏳ |
+| M7 | MATCHDAY e formazioni, Bilancia migliorato, locandina esportabile | ✅ |
 | M8 | Rivalità | ⏳ |
 | M9 | Stagioni, nuove classifiche, Hall of Fame | ⏳ |
 | M10 | Premi partita e achievement | ⏳ |
@@ -161,3 +161,9 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Seed: circa metà dei voti dimostrativi include le abilità.
 - Test: 143 backend verdi (11 nuovi: proprietà dell'algoritmo e API, permessi sulla carriera, edizioni). Build ok, screenshot 390/1280 senza overflow.
 - Non verificato: esportazione PNG su telefoni reali (testata solo la generazione del codice, non la condivisione nativa).
+
+### M7 — MATCHDAY e Bilancia v2 (✅)
+- Bilancia v2 (`teamService`): la forza è l'overall della BONCARD (voto generale, abilità se valutate, forma; 5 per chi non ha dati), portieri separati, difensori e attaccanti distribuiti (uno squilibrio evitabile costa più della tolleranza), casualità controllata, "Rigenera" non ripropone la formazione attuale se esiste un'alternativa equilibrata. Le squadre restano modificabili a mano.
+- `services/headToHead.js` (scontri diretti, partite insieme, gol, MVP, voti, ultime 5, serie in corso, soglia di affidabilità 3) e `matchdayService` con rotta `GET /matches/:mid/matchday` (overall dei convocati, media delle squadre, in forma, rivalità in campo).
+- Frontend: schermata `/partite/:id/matchday` con locandina, countdown, VS con overall medio, campo con formazioni 1-2-2 e badge overall, in forma, rivalità, convocati con link alla BONCARD; esportazione della locandina verticale 1080×1920 e quadrata 1080×1080 (solo nomi, soprannomi, campo e data). Accesso da scheda partita e hero della home.
+- Test: 147 backend verdi (nuovi: ruoli divisi, niente formazione ripetuta, testa a testa, MATCHDAY via API).

@@ -13,6 +13,7 @@ import GroupPolls from './pages/GroupPolls';
 import NewPoll from './pages/NewPoll';
 import PollDetail from './pages/PollDetail';
 import PlayerProfile from './pages/PlayerProfile';
+import Matchday from './pages/Matchday';
 import NewMatch from './pages/NewMatch';
 import MatchDetail from './pages/MatchDetail';
 import GroupRankings from './pages/GroupRankings';
@@ -81,6 +82,7 @@ export default function App() {
           <Route path="membri" element={<GroupMembers />} />
         </Route>
         <Route path="/partite/:matchId" element={<MatchDetail />} />
+        <Route path="/partite/:matchId/matchday" element={<Matchday />} />
         <Route path="/boncall/:pollId" element={<PollDetail />} />
         <Route path="/notifiche" element={<Notifications />} />
         <Route path="/profilo" element={<Profile />} />

@@ -130,9 +130,16 @@ export default function MatchDetail() {
 
   return (
     <div className="page">
-      <Link to={`/gruppi/${match.groupId}/partite`} className="btn btn-ghost btn-sm" style={{ justifySelf: 'start' }}>
-        <Icon name="chevron-left" /> Partite del gruppo
-      </Link>
+      <div className="spread" style={{ flexWrap: 'wrap' }}>
+        <Link to={`/gruppi/${match.groupId}/partite`} className="btn btn-ghost btn-sm">
+          <Icon name="chevron-left" /> Partite del gruppo
+        </Link>
+        {['aperta', 'chiusa'].includes(match.status) && (
+          <Link to={`/partite/${match.id}/matchday`} className="btn btn-sm btn-primary">
+            <Icon name="zap" /> Apri MATCHDAY
+          </Link>
+        )}
+      </div>
 
       <section className="match-hero" style={{ '--field-color': field.color }} aria-labelledby="match-title">
         <div className="row" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}>

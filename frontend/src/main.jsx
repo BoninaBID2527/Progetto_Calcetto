@@ -19,6 +19,7 @@ import './styles/night-league.css';
 import './styles/dashboard.css';
 import './styles/boncall.css';
 import './styles/player.css';
+import './styles/matchday.css';
 import App from './App';
 import { registerServiceWorker } from './utils/pwa';
 import { APP_NAME } from './config';

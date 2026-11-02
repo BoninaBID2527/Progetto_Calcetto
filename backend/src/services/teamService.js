@@ -1,6 +1,8 @@
 'use strict';
 
-const { Match, Rating } = require('../models');
+const { Match } = require('../models');
+const statsEngine = require('./statsEngine');
+const playerRating = require('./playerRating');
 const { conflict, unprocessable } = require('../utils/AppError');
 const { DEFAULTS } = require('../config/appConfig');
 const { sameId } = require('../utils/helpers');
@@ -17,11 +19,13 @@ const matchService = require('./matchService');
  * @param {{id: string, rating: number, role?: string}[]} players
  * @param {{random?: () => number, tolerance?: number}} options
  */
-function balance(players, { random = Math.random, tolerance = 0.6 } = {}) {
+function balance(players, { random = Math.random, tolerance = 0.6, avoid = null } = {}) {
   const n = players.length;
   if (n < 2) throw unprocessable('Servono almeno 2 giocatori per fare le squadre.');
   const sizeA = Math.floor(n / 2);
   const goalkeepers = players.map((p, i) => (p.role === 'portiere' ? i : -1)).filter((i) => i >= 0);
+  const byRole = (role) => players.map((p, i) => (p.role === role ? i : -1)).filter((i) => i >= 0);
+  const outfield = [byRole('difensore'), byRole('attaccante')];
 
   const cost = (inA) => {
     let sumA = 0;
@@ -29,7 +33,14 @@ function balance(players, { random = Math.random, tolerance = 0.6 } = {}) {
     players.forEach((p, i) => (inA[i] ? (sumA += p.rating) : (sumB += p.rating)));
     const gkA = goalkeepers.filter((i) => inA[i]).length;
     const gkSplitPenalty = goalkeepers.length >= 2 && (gkA === 0 || gkA === goalkeepers.length) ? 1.5 : 0;
-    return { diff: Math.abs(sumA - sumB), score: Math.abs(sumA - sumB) + gkSplitPenalty };
+    // Difensori e attaccanti divisi in modo simile tra le due squadre.
+    const rolePenalty = outfield.reduce((s, group) => {
+      const inGroupA = group.filter((i) => inA[i]).length;
+      // Lo squilibrio minimo possibile è 0 (numero pari) o 1 (dispari); ogni unità in più pesa 0,8,
+      // cioè più della tolleranza, così una divisione evitabile non viene mai scelta.
+      return s + Math.max(0, Math.abs(inGroupA - (group.length - inGroupA)) - (group.length % 2)) * 0.8;
+    }, 0);
+    return { diff: Math.abs(sumA - sumB), score: Math.abs(sumA - sumB) + gkSplitPenalty + rolePenalty };
   };
 
   const candidates = [];
@@ -60,7 +71,14 @@ function balance(players, { random = Math.random, tolerance = 0.6 } = {}) {
   }
 
   const best = Math.min(...candidates.map((c) => c.score));
-  const good = candidates.filter((c) => c.score <= best + tolerance);
+  let good = candidates.filter((c) => c.score <= best + tolerance);
+  // "Rigenera" non ripropone la formazione attuale se esiste un'alternativa buona.
+  if (avoid) {
+    const key = (inA) => players.filter((_, i) => inA[i]).map((p) => p.id).sort().join();
+    const avoidKeys = [avoid.a, avoid.b].map((ids) => [...ids].map(String).sort().join());
+    const fresh = good.filter((c) => !avoidKeys.includes(key(c.inA)) && !avoidKeys.includes(players.filter((_, i) => !c.inA[i]).map((p) => p.id).sort().join()));
+    if (fresh.length) good = fresh;
+  }
   const pick = good[Math.floor(random() * good.length)];
   // A caso quale gruppo diventa "A", così anche i colori delle maglie cambiano.
   const flip = random() < 0.5;
@@ -70,21 +88,25 @@ function balance(players, { random = Math.random, tolerance = 0.6 } = {}) {
   return { a, b, diff: Math.abs(strength(a) - strength(b)), strengthA: strength(a), strengthB: strength(b) };
 }
 
-/** Media dei voti ricevuti nel gruppo; chi non ne ha mai ricevuti vale 5. */
-async function ratingsFor(groupId, userIds) {
-  const ratings = await Rating.find({ group: groupId, ratee: { $in: userIds } }).lean();
-  const sums = new Map();
-  for (const r of ratings) {
-    const key = String(r.ratee);
-    const s = sums.get(key) || { total: 0, count: 0 };
-    s.total += r.score;
-    s.count += 1;
-    sums.set(key, s);
-  }
+/**
+ * Forza di ogni giocatore per Bilancia: l'overall della BONCARD diviso 10
+ * (voto generale, abilità se valutate, forma). Chi non ha dati vale 5.
+ */
+async function ratingsFor(groupId, users) {
+  const { matches, ratings } = await statsEngine.loadPlayed(groupId);
+  const rows = statsEngine.playerRows(matches, ratings);
   return new Map(
-    userIds.map((id) => {
-      const s = sums.get(String(id));
-      return [String(id), s ? s.total / s.count : DEFAULTS.newPlayerRating];
+    users.map((u) => {
+      const mine = rows.filter((r) => r.user === String(u._id));
+      if (!mine.length) return [String(u._id), { rating: DEFAULTS.newPlayerRating, overall: null }];
+      const ov = playerRating.overall({
+        ratings: mine.flatMap((r) => r.ratings),
+        perMatch: mine.map((r) => r.avgRating),
+        attributeVotes: mine.flatMap((r) => r.attributes),
+        role: u.preferredRole,
+        played: mine.length,
+      });
+      return [String(u._id), { rating: ov.value / 10, overall: ov.value, provisional: ov.provisional }];
     })
   );
 }
@@ -101,9 +123,10 @@ async function autoBalance(match, { names, random } = {}) {
   const confirmed = match.participants.filter((p) => p.response === 'ci_sono');
   const { User } = require('../models');
   const users = await User.find({ _id: { $in: confirmed.map((p) => p.user) } }).lean();
-  const ratings = await ratingsFor(match.group, users.map((u) => u._id));
-  const players = users.map((u) => ({ id: String(u._id), rating: ratings.get(String(u._id)), role: u.preferredRole }));
-  const result = balance(players, { random });
+  const ratings = await ratingsFor(match.group, users);
+  const players = users.map((u) => ({ id: String(u._id), rating: ratings.get(String(u._id)).rating, role: u.preferredRole }));
+  const avoid = match.teams ? { a: match.teams.a.players, b: match.teams.b.players } : null;
+  const result = balance(players, { random, avoid });
   const [nameA, nameB] = teamNames(match, names);
   await Match.updateOne(
     { _id: match._id },
