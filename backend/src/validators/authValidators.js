@@ -31,7 +31,7 @@ const updateMe = z
     avatarUrl,
     preferredRole: z.enum(ROLE_KEYS).nullable(),
     foot: z.enum(FOOT_KEYS).nullable(),
-    settings: z.object({ nicknameMode: z.enum(['accanto', 'sostituisci']) }).strict(),
+    settings: z.object({ nicknameMode: z.enum(['accanto', 'sostituisci']), motion: z.enum(['auto', 'ridotto']) }).partial().strict(),
   })
   .partial()
   .strict();

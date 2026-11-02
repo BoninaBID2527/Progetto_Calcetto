@@ -13,7 +13,8 @@ body {
   margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--c-bg);
+  background: var(--stadium-light) no-repeat, var(--c-bg);
+  background-attachment: fixed;
   color: var(--c-text);
   font-family: var(--font-body);
   font-size: 16px;
@@ -58,18 +59,36 @@ h4 {
 }
 
 h1 {
-  font-size: clamp(2rem, 1.4rem + 2.4vw, 3.4rem);
+  font-size: var(--fs-3xl);
   text-transform: uppercase;
+  letter-spacing: 0.005em;
 }
 
 h2 {
-  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem);
+  font-size: var(--fs-2xl);
   text-transform: uppercase;
 }
 
 h3 {
-  font-size: 1.3rem;
+  font-family: var(--font-editorial);
+  font-size: var(--fs-lg);
   font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.editorial {
+  font-family: var(--font-editorial);
+  letter-spacing: -0.02em;
+}
+
+/* Etichetta da grafica televisiva: maiuscolo, spaziato, piccolo. */
+.overline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-text-2);
 }
 
 p {
@@ -154,4 +173,13 @@ p {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Preferenza "movimento ridotto" scelta nel profilo: vale come quella di sistema. */
+[data-motion='ridotto'] *,
+[data-motion='ridotto'] *::before,
+[data-motion='ridotto'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }

@@ -1,0 +1,404 @@
+/*
+ * NIGHT LEAGUE — strato visivo della V2.
+ * Si appoggia ai token di tokens.css e ridefinisce l'aspetto dei componenti
+ * di base; i layout restano in layout.css e pages.css.
+ */
+
+/* ---------------------------------------------------------------- superfici */
+.card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 40%), var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-1);
+}
+
+[data-theme='light'] .card {
+  background: var(--c-surface);
+}
+
+.card-elevated {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 50%), var(--c-surface-2);
+  box-shadow: var(--shadow-2);
+}
+
+.card-feature {
+  border-left: 3px solid var(--card-accent, var(--c-primary));
+}
+
+.card-glass {
+  background: color-mix(in srgb, var(--c-surface) 72%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.card-gold {
+  border-color: color-mix(in srgb, var(--c-gold) 45%, transparent);
+  background: linear-gradient(160deg, var(--c-gold-soft), transparent 55%), var(--c-surface);
+}
+
+/* Titoli di sezione con il "segnaposto" lime delle grafiche TV. */
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-xl);
+  letter-spacing: 0.02em;
+}
+
+.section-title .icon {
+  color: var(--c-primary-text);
+}
+
+.overline .icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+}
+
+/* ---------------------------------------------------------------- pulsanti */
+.btn {
+  border-radius: var(--radius-m);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.btn-primary {
+  box-shadow: 0 6px 22px -8px var(--c-primary-glow);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 8px 28px -6px var(--c-primary-glow), var(--glow-primary);
+}
+
+.btn-danger-solid {
+  --btn-bg: var(--c-red);
+  --btn-fg: var(--c-ink);
+  --btn-border: var(--c-red);
+}
+
+.btn-badge {
+  position: absolute;
+  top: 2px;
+  right: 0;
+}
+
+.btn-icon {
+  position: relative;
+}
+
+.btn-in {
+  border-radius: var(--radius-m);
+  letter-spacing: 0.05em;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------------------------------------------------------- statistiche */
+.stat-grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+}
+
+.stat-card {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  min-width: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-m);
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-border);
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-2xl);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value small {
+  margin-left: 4px;
+  font-size: var(--fs-md);
+  color: var(--c-text-2);
+}
+
+.stat-hint {
+  font-size: var(--fs-xs);
+  color: var(--c-text-2);
+}
+
+.stat-primary .stat-value {
+  color: var(--c-primary-text);
+}
+
+.stat-gold {
+  background: linear-gradient(160deg, var(--c-gold-soft), transparent), var(--c-surface-2);
+}
+
+.stat-gold .stat-value {
+  color: var(--c-gold-text);
+}
+
+/* ---------------------------------------------------------------- countdown */
+.countdown {
+  display: inline-grid;
+  gap: 6px;
+}
+
+.countdown-units {
+  display: flex;
+  gap: 6px;
+}
+
+.countdown-unit {
+  display: grid;
+  justify-items: center;
+  min-width: 54px;
+  padding: 6px 8px;
+  border-radius: var(--radius-s);
+  background: rgba(9, 13, 12, 0.55);
+  border: 1px solid var(--c-border-strong);
+}
+
+[data-theme='light'] .countdown-unit {
+  background: var(--c-surface);
+}
+
+.countdown-unit b {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-2xl);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown-unit i {
+  font-style: normal;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--c-text-2);
+  text-transform: uppercase;
+}
+
+.countdown.is-compact .countdown-unit {
+  min-width: 40px;
+  padding: 4px 6px;
+}
+
+.countdown.is-compact .countdown-unit b {
+  font-size: var(--fs-lg);
+}
+
+.countdown.is-live {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-xl);
+  color: var(--c-primary-text);
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------- tooltip */
+.tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 60;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  width: max-content;
+  max-width: 240px;
+  padding: 8px 10px;
+  border-radius: var(--radius-s);
+  background: var(--c-text);
+  color: var(--c-bg);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1.35;
+  transform: translate(-50%, 4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+.tooltip-wrap:hover .tooltip,
+.tooltip-wrap:focus-within .tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------------------------------------------------------------- progress */
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.progress-wrap .progress {
+  flex: 1;
+}
+
+.progress span {
+  background: linear-gradient(90deg, var(--c-primary), color-mix(in srgb, var(--c-primary) 60%, var(--c-gold)));
+}
+
+.progress-gold span {
+  background: linear-gradient(90deg, var(--c-gold), var(--c-orange));
+}
+
+.progress-orange span {
+  background: var(--c-orange);
+}
+
+/* ---------------------------------------------------------------- finestre e pannelli */
+.modal {
+  background: var(--c-surface);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.modal-title {
+  font-size: var(--fs-xl);
+}
+
+.modal-foot {
+  margin-top: var(--space-5);
+}
+
+.sheet-handle {
+  display: block;
+  width: 44px;
+  height: 5px;
+  margin: -8px auto var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--c-border-strong);
+}
+
+.modal.sheet {
+  padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 720px) {
+  .modal {
+    border-radius: var(--radius-xl);
+  }
+
+  .sheet-handle {
+    display: none;
+  }
+}
+
+.sheet-menu {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sheet-menu a,
+.sheet-menu button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 56px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+  background: var(--c-surface-2);
+  color: var(--c-text);
+  font-weight: 700;
+  text-decoration: none;
+  text-align: left;
+}
+
+.sheet-menu .icon {
+  width: 22px;
+  height: 22px;
+  color: var(--c-primary-text);
+}
+
+.sheet-menu a:hover,
+.sheet-menu button:hover {
+  border-color: var(--c-primary);
+}
+
+/* ---------------------------------------------------------------- navigazione */
+.sidebar {
+  background: var(--c-bg-2);
+}
+
+.side-section {
+  margin: var(--space-3) 0 var(--space-1) 14px;
+}
+
+.side-item[aria-current='page'] {
+  background: var(--c-primary-soft);
+  color: var(--c-primary-text);
+  box-shadow: inset 3px 0 0 var(--c-primary);
+}
+
+.bottom-nav {
+  grid-template-columns: repeat(5, 1fr);
+  background: color-mix(in srgb, var(--c-bg-2) 92%, transparent);
+}
+
+.nav-fab,
+.nav-fab-button {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 0 0 8px;
+  border: 0;
+  background: none;
+  color: var(--c-text);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.nav-fab span.fab {
+  border-radius: 20px;
+  background: var(--c-primary);
+  color: var(--c-ink);
+  box-shadow: 0 10px 28px -6px var(--c-primary-glow);
+}
+
+.nav-item[aria-current='page']::before {
+  background: var(--c-primary);
+}
+
+.topbar {
+  background: color-mix(in srgb, var(--c-bg) 82%, transparent);
+}
+
+/* ---------------------------------------------------------------- elenchi */
+.rank-row-link {
+  display: contents;
+  color: inherit;
+  text-decoration: none;
+}
+
+.empty.is-compact {
+  padding: var(--space-4);
+}
+
+.empty h3 {
+  font-family: var(--font-display);
+}
+
+/* ---------------------------------------------------------------- entrata delle pagine */
+.page-enter {
+  min-width: 0;
+}

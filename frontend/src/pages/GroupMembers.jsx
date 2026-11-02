@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import Icon from '../components/Icon';
 import { Player } from '../components/Avatar';
-import { CardSkeleton, ErrorState, FormAlert, FormField, Modal, Segmented } from '../components/ui';
+import { CardSkeleton, ErrorState, FormAlert, FormField, Modal, Segmented, useConfirm } from '../components/ui';
 import { api } from '../api/client';
 import { useResource } from '../hooks/useResource';
 import { useAuth } from '../context/AuthContext';
@@ -116,6 +116,7 @@ function NicknameDialog({ group, member, meId, isAdmin, onClose, onChanged }) {
 
 function InviteCard({ group, isAdmin }) {
   const toast = useToast();
+  const confirm = useConfirm();
   const { refreshGroups } = useAppData();
   const [busy, setBusy] = useState(false);
   const link = `${window.location.origin}/entra/${group.inviteCode}`;
@@ -138,7 +139,7 @@ function InviteCard({ group, isAdmin }) {
     } else copy(link, 'Link copiato.');
   };
   const regenerate = async () => {
-    if (!window.confirm('Rigenerare il codice? Quello vecchio smetterà di funzionare.')) return;
+    if (!(await confirm({ title: 'Rigenerare il codice?', message: 'Il codice e il link attuali smetteranno di funzionare.', confirmLabel: 'Rigenera' }))) return;
     setBusy(true);
     try {
       await api(`/groups/${group.id}/invite-code`, { method: 'POST' });
@@ -309,6 +310,7 @@ export default function GroupMembers() {
   const { user } = useAuth();
   const { refreshGroups } = useAppData();
   const toast = useToast();
+  const confirm = useConfirm();
   const navigate = useNavigate();
   const { data, error, loading, reload } = useResource(() => api(`/groups/${group.id}/members`), [group.id]);
   const [nicknameFor, setNicknameFor] = useState(null);
@@ -331,7 +333,13 @@ export default function GroupMembers() {
 
   const remove = async (member) => {
     const self = member.user.id === user.id;
-    if (!window.confirm(self ? `Uscire da ${group.name}?` : `Rimuovere ${member.user.name} dal gruppo?`)) return;
+    const ok = await confirm({
+      title: self ? `Uscire da ${group.name}?` : `Rimuovere ${member.user.name}?`,
+      message: self ? 'Non vedrai più partite, chat e classifiche del gruppo.' : 'Non vedrà più partite, chat e classifiche del gruppo.',
+      confirmLabel: self ? 'Esci dal gruppo' : 'Rimuovi',
+      danger: true,
+    });
+    if (!ok) return;
     try {
       await api(`/groups/${group.id}/members/${member.user.id}`, { method: 'DELETE' });
       if (self) {

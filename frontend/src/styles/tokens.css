@@ -1,57 +1,84 @@
 /*
- * Design tokens di BONMATCH: "spogliatoio moderno".
- * Tema scuro di default, tema chiaro con [data-theme="light"].
- * I colori "-text" sono le varianti da usare come testo: in chiaro sono
- * scuriti per rispettare il contrasto WCAG AA (verificato con axe-core).
+ * BONMATCH V2 — NIGHT LEAGUE. Tutti i colori passano da qui.
+ * Lime elettrico per azioni e progressione, oro per premi e card speciali,
+ * arancio come accento caldo. Le varianti "-text" sono quelle da usare per
+ * il testo: hanno contrasto WCAG AA sulle superfici del proprio tema.
+ * I nomi storici (--c-yellow, --c-surface-3…) restano come alias.
  */
 :root {
   color-scheme: dark;
 
-  --c-bg: #0b1f1a;
-  --c-surface: #12302a;
-  --c-surface-2: #173b33;
-  --c-surface-3: #1e4a40;
-  --c-border: rgba(157, 181, 171, 0.16);
-  --c-border-strong: rgba(157, 181, 171, 0.34);
-  --c-text: #f2f7f4;
-  --c-text-2: #9db5ab;
-  --c-ink: #0b1f1a; /* testo su sfondi accesi */
+  /* Fondi e superfici */
+  --c-bg: #090d0c;
+  --c-bg-2: #111915;
+  --c-surface: #19251e;
+  --c-surface-2: #24332a;
+  --c-surface-3: #2e4036;
+  --c-border: rgba(167, 181, 172, 0.14);
+  --c-border-strong: rgba(167, 181, 172, 0.3);
 
-  --c-primary: #2ee59d;
-  --c-primary-hover: #5cf0b5;
-  --c-primary-text: #2ee59d;
-  --c-primary-soft: rgba(46, 229, 157, 0.14);
-  --c-orange: #ff8a3d;
-  /* Un filo più chiaro dell'accento: resta AA anche sulle righe evidenziate. */
-  --c-orange-text: #ffa062;
-  --c-orange-soft: rgba(255, 138, 61, 0.15);
-  --c-yellow: #ffd23f;
-  --c-yellow-text: #ffd23f;
-  --c-yellow-soft: rgba(255, 210, 63, 0.14);
-  --c-red: #ff4d4d;
-  --c-red-text: #ff6b6b;
-  --c-red-soft: rgba(255, 77, 77, 0.14);
-  --c-blue: #4cc9f0;
+  /* Testo */
+  --c-text: #f4f8f2;
+  --c-text-2: #a7b5ac;
+  --c-ink: #090d0c; /* testo su lime, oro e arancio */
 
-  --c-gold: #ffd23f;
-  --c-silver: #c9d6d0;
-  --c-bronze: #e0a06a;
+  /* Primario: lime elettrico */
+  --c-primary: #c7ff36;
+  --c-primary-hover: #d8ff75;
+  --c-primary-text: #c7ff36;
+  --c-primary-soft: rgba(199, 255, 54, 0.12);
+  --c-primary-glow: rgba(199, 255, 54, 0.28);
 
-  --c-pitch-1: #1c7a4c;
-  --c-pitch-2: #187045;
-  --c-pitch-line: rgba(255, 255, 255, 0.55);
+  /* Accenti */
+  --c-orange: #ff704a;
+  --c-orange-text: #ff8466;
+  --c-orange-soft: rgba(255, 112, 74, 0.14);
+  --c-gold: #f5d98c;
+  --c-gold-text: #f5d98c;
+  --c-gold-soft: rgba(245, 217, 140, 0.14);
+  --c-red: #ff5757;
+  --c-red-text: #ff7373;
+  --c-red-soft: rgba(255, 87, 87, 0.14);
+  --c-blue: #6fd3ff;
 
-  --c-overlay: rgba(3, 12, 9, 0.72);
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 14px rgba(0, 0, 0, 0.18);
-  --shadow-2: 0 10px 40px rgba(0, 0, 0, 0.45);
-  --glow-primary: 0 0 0 4px rgba(46, 229, 157, 0.18);
+  /* Alias V1 */
+  --c-yellow: var(--c-gold);
+  --c-yellow-text: var(--c-gold-text);
+  --c-yellow-soft: var(--c-gold-soft);
 
+  --c-silver: #c8d2cc;
+  --c-bronze: #d9a274;
+
+  --c-pitch-1: #16402a;
+  --c-pitch-2: #133823;
+  --c-pitch-line: rgba(244, 248, 242, 0.45);
+
+  --c-overlay: rgba(4, 7, 6, 0.74);
+  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --glow-primary: 0 0 0 4px rgba(199, 255, 54, 0.2);
+  --stadium-light: radial-gradient(1200px 420px at 75% -120px, rgba(199, 255, 54, 0.07), transparent 70%),
+    radial-gradient(900px 380px at 0% -80px, rgba(111, 211, 255, 0.05), transparent 70%);
+
+  /* Tipografia */
   --font-display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
+  --font-editorial: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: clamp(1.1rem, 1.05rem + 0.25vw, 1.25rem);
+  --fs-xl: clamp(1.35rem, 1.2rem + 0.7vw, 1.75rem);
+  --fs-2xl: clamp(1.75rem, 1.4rem + 1.5vw, 2.6rem);
+  --fs-3xl: clamp(2.3rem, 1.6rem + 3vw, 4rem);
+  --fs-display: clamp(3rem, 1.8rem + 5.5vw, 7rem);
+
+  /* Spazi e forme */
   --radius-s: 8px;
   --radius-m: 14px;
   --radius-l: 22px;
+  --radius-xl: 30px;
   --radius-pill: 999px;
 
   --space-1: 4px;
@@ -64,44 +91,53 @@
   --space-8: 64px;
   --gutter: clamp(16px, 2.6vw, 40px);
 
+  /* Movimento */
   --dur-fast: 150ms;
-  --dur: 200ms;
-  --dur-slow: 250ms;
+  --dur: 220ms;
+  --dur-slow: 300ms;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   --nav-h: 72px;
   --header-h: 64px;
-  --sidebar-w: 272px;
+  --sidebar-w: 276px;
 }
 
 [data-theme='light'] {
   color-scheme: light;
 
-  --c-bg: #f5f8f6;
+  --c-bg: #f3f6f0;
+  --c-bg-2: #e9eee6;
   --c-surface: #ffffff;
-  --c-surface-2: #edf3ef;
-  --c-surface-3: #e1ebe5;
-  --c-border: rgba(11, 31, 26, 0.1);
-  --c-border-strong: rgba(11, 31, 26, 0.22);
-  --c-text: #0b1f1a;
-  --c-text-2: #4a6158;
+  --c-surface-2: #eef2ec;
+  --c-surface-3: #e1e8de;
+  --c-border: rgba(9, 13, 12, 0.1);
+  --c-border-strong: rgba(9, 13, 12, 0.22);
 
-  --c-primary-hover: #25d08c;
-  --c-primary-text: #08734c;
-  --c-primary-soft: rgba(8, 115, 76, 0.1);
-  --c-orange-text: #b04a0c;
-  --c-orange-soft: rgba(255, 138, 61, 0.16);
-  --c-yellow-text: #8a6a00;
-  --c-yellow-soft: rgba(255, 210, 63, 0.24);
-  --c-red-text: #c62828;
-  --c-red-soft: rgba(255, 77, 77, 0.12);
+  --c-text: #0c1410;
+  --c-text-2: #4d5c53;
 
-  --c-silver: #9fb0a8;
-  --c-pitch-1: #2a9a62;
-  --c-pitch-2: #258b58;
+  /* Il lime resta per i pulsanti (testo scuro sopra); come testo serve un verde oliva. */
+  --c-primary-hover: #b8f21f;
+  --c-primary-text: #4a6b00;
+  --c-primary-soft: rgba(110, 160, 0, 0.12);
+  --c-primary-glow: rgba(110, 160, 0, 0.25);
 
-  --c-overlay: rgba(11, 31, 26, 0.5);
-  --shadow-1: 0 1px 2px rgba(11, 31, 26, 0.08), 0 6px 18px rgba(11, 31, 26, 0.06);
-  --shadow-2: 0 16px 48px rgba(11, 31, 26, 0.16);
-  --glow-primary: 0 0 0 4px rgba(8, 115, 76, 0.16);
+  --c-orange-text: #b83d1c;
+  --c-orange-soft: rgba(255, 112, 74, 0.14);
+  --c-gold: #e8c15a;
+  --c-gold-text: #7a5d00;
+  --c-gold-soft: rgba(232, 193, 90, 0.22);
+  --c-red-text: #c42b2b;
+  --c-red-soft: rgba(255, 87, 87, 0.12);
+
+  --c-silver: #9aa9a1;
+  --c-pitch-1: #2f8a52;
+  --c-pitch-2: #2a7d4a;
+
+  --c-overlay: rgba(9, 13, 12, 0.5);
+  --shadow-1: 0 1px 2px rgba(9, 13, 12, 0.06), 0 8px 24px rgba(9, 13, 12, 0.06);
+  --shadow-2: 0 20px 50px rgba(9, 13, 12, 0.16);
+  --glow-primary: 0 0 0 4px rgba(110, 160, 0, 0.2);
+  --stadium-light: radial-gradient(1200px 420px at 75% -120px, rgba(199, 255, 54, 0.22), transparent 70%);
 }

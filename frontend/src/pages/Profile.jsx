@@ -40,6 +40,7 @@ export default function Profile() {
     preferredRole: user.preferredRole,
     foot: user.foot,
     nicknameMode: user.settings.nicknameMode,
+    motion: user.settings.motion || 'auto',
   });
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -66,7 +67,7 @@ export default function Profile() {
         avatarUrl: form.avatarUrl || null,
         preferredRole: form.preferredRole || null,
         foot: form.foot || null,
-        settings: { nicknameMode: form.nicknameMode },
+        settings: { nicknameMode: form.nicknameMode, motion: form.motion },
       });
       toast.success('Profilo aggiornato.');
     } catch (err) {
@@ -140,6 +141,19 @@ export default function Profile() {
                 ]}
               />
               <span className="hint">Esempio: «Luca «Cesarini»» oppure solo «Cesarini». Ricordati di salvare.</span>
+            </div>
+            <div className="field">
+              <span className="label">Animazioni</span>
+              <Segmented
+                label="Animazioni"
+                value={form.motion}
+                onChange={(motion) => setForm({ ...form, motion })}
+                options={[
+                  { value: 'auto', label: 'Come il sistema' },
+                  { value: 'ridotto', label: 'Ridotte' },
+                ]}
+              />
+              <span className="hint">Con «Ridotte» le premiazioni e le transizioni diventano istantanee.</span>
             </div>
             <div className="field">
               <span className="label">Tema</span>

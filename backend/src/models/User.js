@@ -14,6 +14,8 @@ const userSchema = new Schema(
     settings: {
       // Come mostrare i soprannomi degli altri: accanto al nome oppure al posto del nome.
       nicknameMode: { type: String, enum: ['accanto', 'sostituisci'], default: 'accanto' },
+      // "ridotto" spegne le animazioni anche se il sistema non lo chiede.
+      motion: { type: String, enum: ['auto', 'ridotto'], default: 'auto' },
     },
   },
   { timestamps: true }

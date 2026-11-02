@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import Icon from '../components/Icon';
 
 const ToastContext = createContext(null);
@@ -33,15 +34,25 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={api}>
       {children}
       <div className="toasts" role="status" aria-live="polite">
+        <AnimatePresence initial={false}>
         {toasts.map((t) => (
-          <div key={t.id} className={`toast toast-${t.kind}`}>
+          <motion.div
+            key={t.id}
+            className={`toast toast-${t.kind}`}
+            layout
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, transition: { duration: 0.15 } }}
+            transition={{ duration: 0.22, ease: [0.2, 0.7, 0.2, 1] }}
+          >
             <Icon name={icons[t.kind]} />
             <span>{t.message}</span>
             <button type="button" className="btn btn-ghost btn-sm btn-icon" onClick={() => dismiss(t.id)} aria-label="Chiudi avviso">
               <Icon name="x" />
             </button>
-          </div>
+          </motion.div>
         ))}
+        </AnimatePresence>
       </div>
     </ToastContext.Provider>
   );

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Icon from '../Icon';
-import { FormAlert, FormField, Modal } from '../ui';
+import { FormAlert, FormField, Modal, useConfirm } from '../ui';
 import { api } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
 import { FieldPicker, Stepper } from '../../pages/NewMatch';
@@ -68,6 +68,7 @@ function EditMatch({ match, onClose, onSaved }) {
 
 export default function ManagePanel({ match, voting, onUpdated }) {
   const toast = useToast();
+  const confirm = useConfirm();
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(false);
 
@@ -122,7 +123,10 @@ export default function ManagePanel({ match, voting, onUpdated }) {
             type="button"
             className="btn btn-danger"
             disabled={busy}
-            onClick={() => window.confirm('Annullare la partita? Gli iscritti riceveranno una notifica.') && status('annullata', 'Partita annullata.')}
+            onClick={async () => {
+              const ok = await confirm({ title: 'Annullare la partita?', message: 'Gli iscritti riceveranno una notifica. Non si può tornare indietro.', confirmLabel: 'Annulla la partita', cancelLabel: 'Lascia stare', danger: true });
+              if (ok) status('annullata', 'Partita annullata.');
+            }}
           >
             <Icon name="ban" /> Annulla partita
           </button>

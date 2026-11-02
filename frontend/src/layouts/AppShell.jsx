@@ -1,12 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
-import Logo from '../components/Logo';
+import { motion, useReducedMotion } from 'motion/react';
+import BrandLogo from '../components/brand/BrandLogo';
 import Icon from '../components/Icon';
 import ConnectionIndicator, { ConnectionBanner } from '../components/ConnectionIndicator';
 import { Avatar } from '../components/Avatar';
+import { BottomSheet, IconButton } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { useAppData } from '../context/AppDataContext';
 import { useTheme } from '../context/ThemeContext';
+import { navigationFor } from './navigation';
 
 function GroupSwitch() {
   const { groups, activeGroup } = useAppData();
@@ -16,8 +19,8 @@ function GroupSwitch() {
   const onChange = (e) => {
     const id = e.target.value;
     if (id === '__all') return navigate('/gruppi');
-    const section = location.pathname.match(/^\/gruppi\/[^/]+\/(partite|classifiche|chat|membri)/)?.[1] || 'partite';
-    return navigate(`/gruppi/${id}/${section}`);
+    const section = location.pathname.match(/^\/gruppi\/[^/]+\/([a-z-]+)/)?.[1] || '';
+    return navigate(`/gruppi/${id}${section ? `/${section}` : ''}`);
   };
   return (
     <div className="group-switch">
@@ -36,29 +39,28 @@ function GroupSwitch() {
   );
 }
 
-function useNavItems() {
-  const { activeGroup } = useAppData();
-  const base = activeGroup ? `/gruppi/${activeGroup.id}` : '/gruppi';
-  const unread = activeGroup?.unreadCount || 0;
-  return {
-    base,
-    hasGroup: Boolean(activeGroup),
-    items: [
-      { to: activeGroup ? `${base}/partite` : '/gruppi', label: 'Partite', icon: 'calendar' },
-      { to: activeGroup ? `${base}/classifiche` : '/gruppi', label: 'Classifiche', icon: 'trophy' },
-      { to: activeGroup ? `${base}/chat` : '/gruppi', label: 'Chat', icon: 'chat', badge: unread },
-      { to: activeGroup ? `${base}/membri` : '/gruppi', label: 'Gruppo', icon: 'shield' },
-      { to: '/profilo', label: 'Profilo', icon: 'user' },
-    ],
-  };
-}
-
-function Badge({ count, label }) {
-  if (!count) return null;
+function Count({ value, label }) {
+  if (!value) return null;
   return (
     <span className="badge-count" aria-label={label}>
-      {count > 99 ? '99+' : count}
+      {value > 99 ? '99+' : value}
     </span>
+  );
+}
+
+function SheetMenu({ items, onNavigate }) {
+  return (
+    <ul className="sheet-menu">
+      {items.map((item) => (
+        <li key={item.label}>
+          <Link to={item.to} onClick={onNavigate}>
+            <Icon name={item.icon} />
+            <span style={{ flex: 1 }}>{item.label}</span>
+            <Count value={item.badge} label={item.badgeLabel} />
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -66,16 +68,19 @@ export default function AppShell() {
   const { user, logout } = useAuth();
   const { activeGroup, setActiveId, notifications } = useAppData();
   const { theme, toggle } = useTheme();
+  const location = useLocation();
+  const reduce = useReducedMotion();
   const groupMatch = useMatch('/gruppi/:groupId/*');
-  const { items, base, hasGroup } = useNavItems();
   const routeGroupId = groupMatch?.params.groupId;
+  const [sheet, setSheet] = useState(null);
 
   useEffect(() => {
     if (routeGroupId) setActiveId(routeGroupId);
   }, [routeGroupId, setActiveId]);
 
-  const newMatch = hasGroup ? `${base}/nuova-partita` : '/gruppi';
-  const unreadNotes = notifications.unread;
+  useEffect(() => setSheet(null), [location.pathname]);
+
+  const nav = navigationFor(activeGroup, { unreadNotifications: notifications.unread });
 
   return (
     <div className="shell">
@@ -84,28 +89,28 @@ export default function AppShell() {
       </a>
 
       <aside className="sidebar" aria-label="Navigazione principale">
-        <Logo to={hasGroup ? `${base}/partite` : '/gruppi'} />
+        <BrandLogo to={nav.home} />
         <GroupSwitch />
-        <Link to={newMatch} className="btn btn-primary btn-block">
-          <Icon name="plus" /> Nuova partita
-        </Link>
-        <nav className="sidebar-nav" aria-label="Sezioni">
-          {items.map((item) => (
-            <NavLink key={item.label} to={item.to} className="side-item" end={item.to === '/gruppi'}>
-              <Icon name={item.icon} />
-              {item.label}
-              <Badge count={item.badge} label={`${item.badge} messaggi non letti`} />
-            </NavLink>
+        <div className="btn-row">
+          {nav.create.map((c, i) => (
+            <Link key={c.label} to={c.to} className={`btn ${i === 0 ? 'btn-primary' : ''}`} style={{ flex: 1 }}>
+              <Icon name={c.icon} /> {c.short}
+            </Link>
           ))}
-          <NavLink to="/notifiche" className="side-item">
-            <Icon name="bell" />
-            Notifiche
-            <Badge count={unreadNotes} label={`${unreadNotes} notifiche non lette`} />
-          </NavLink>
-          <NavLink to="/gruppi" className="side-item" end>
-            <Icon name="home" />
-            Tutti i gruppi
-          </NavLink>
+        </div>
+        <nav className="sidebar-nav" aria-label="Sezioni">
+          {nav.sections.map((section) => (
+            <div key={section.title} className="stack" style={{ gap: 4 }}>
+              <span className="overline side-section">{section.title}</span>
+              {section.items.map((item) => (
+                <NavLink key={item.label} to={item.to} className="side-item" end={item.end}>
+                  <Icon name={item.icon} />
+                  {item.label}
+                  <Count value={item.badge} label={item.badgeLabel} />
+                </NavLink>
+              ))}
+            </div>
+          ))}
         </nav>
         <div className="sidebar-foot">
           <ConnectionIndicator />
@@ -121,34 +126,28 @@ export default function AppShell() {
                 <span className="player-sub">Il tuo profilo</span>
               </span>
             </Link>
-            <button
-              type="button"
-              className="btn btn-ghost btn-icon"
-              aria-label="Esci"
-              title="Esci"
-              onClick={async () => {
-                await logout();
-              }}
-            >
-              <Icon name="logout" />
-            </button>
+            <IconButton icon="logout" label="Esci" onClick={logout} />
           </div>
         </div>
       </aside>
 
       <div className="shell-main">
         <header className="topbar">
-          <Logo to={hasGroup ? `${base}/partite` : '/gruppi'} className="logo-link" />
+          <BrandLogo to={nav.home} className="logo-link" />
           <div className="mobile-only">
             <GroupSwitch />
           </div>
           <div className="topbar-actions">
             <span className="desktop-only">{activeGroup && <span className="muted">{activeGroup.memberCount} membri</span>}</span>
-            <Link to="/notifiche" className="btn btn-ghost btn-icon" aria-label={`Notifiche${unreadNotes ? `, ${unreadNotes} non lette` : ''}`} style={{ position: 'relative' }}>
+            <Link
+              to="/notifiche"
+              className="btn btn-ghost btn-icon"
+              aria-label={`Notifiche${notifications.unread ? `, ${notifications.unread} non lette` : ''}`}
+            >
               <Icon name="bell" />
-              {unreadNotes > 0 && (
-                <span className="badge-count" style={{ position: 'absolute', top: 2, right: 0 }} aria-hidden="true">
-                  {unreadNotes > 99 ? '99+' : unreadNotes}
+              {notifications.unread > 0 && (
+                <span className="badge-count btn-badge" aria-hidden="true">
+                  {notifications.unread > 99 ? '99+' : notifications.unread}
                 </span>
               )}
             </Link>
@@ -156,35 +155,56 @@ export default function AppShell() {
         </header>
         <ConnectionBanner />
         <main id="contenuto" tabIndex={-1}>
-          <Outlet />
+          <motion.div
+            key={location.pathname}
+            className="page-enter"
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22, ease: [0.2, 0.7, 0.2, 1] }}
+          >
+            <Outlet />
+          </motion.div>
         </main>
       </div>
 
       <nav className="bottom-nav" aria-label="Navigazione principale">
-        {items.slice(0, 2).map((item) => (
-          <NavLink key={item.label} to={item.to} className="nav-item">
+        {nav.bottom.slice(0, 2).map((item) => (
+          <NavLink key={item.label} to={item.to} className="nav-item" end={item.end}>
             <Icon name={item.icon} />
             {item.label}
+            <Count value={item.badge} label={item.badgeLabel} />
           </NavLink>
         ))}
-        <Link to={newMatch} className="nav-fab" aria-label="Nuova partita">
+        <button type="button" className="nav-fab-button nav-fab" onClick={() => setSheet('create')} aria-haspopup="dialog">
           <span className="fab">
             <Icon name="plus" />
           </span>
-          Nuova
-        </Link>
-        {items.slice(2).map((item) => (
-          <NavLink key={item.label} to={item.to} className="nav-item">
+          Crea
+        </button>
+        {nav.bottom.slice(2, 3).map((item) => (
+          <NavLink key={item.label} to={item.to} className="nav-item" end={item.end}>
             <Icon name={item.icon} />
             {item.label}
-            {item.badge > 0 && (
-              <span className="badge-count" aria-label={`${item.badge} messaggi non letti`}>
-                {item.badge > 99 ? '99+' : item.badge}
-              </span>
-            )}
+            <Count value={item.badge} label={item.badgeLabel} />
           </NavLink>
         ))}
+        <button type="button" className="nav-item" style={{ border: 0, background: 'none' }} onClick={() => setSheet('more')} aria-haspopup="dialog">
+          <Icon name="more" />
+          Altro
+          <Count value={nav.moreBadge} label="Novità nelle altre sezioni" />
+        </button>
       </nav>
+
+      {sheet === 'create' && (
+        <BottomSheet title="Cosa vuoi organizzare?" onClose={() => setSheet(null)}>
+          <SheetMenu items={nav.create} onNavigate={() => setSheet(null)} />
+        </BottomSheet>
+      )}
+      {sheet === 'more' && (
+        <BottomSheet title="Tutte le sezioni" onClose={() => setSheet(null)}>
+          <SheetMenu items={nav.more} onNavigate={() => setSheet(null)} />
+        </BottomSheet>
+      )}
     </div>
   );
 }

@@ -8,11 +8,14 @@ import '@fontsource/inter/700.css';
 import '@fontsource/barlow-condensed/600.css';
 import '@fontsource/barlow-condensed/700.css';
 import '@fontsource/barlow-condensed/800.css';
+import '@fontsource/space-grotesk/500.css';
+import '@fontsource/space-grotesk/700.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 import './styles/layout.css';
 import './styles/pages.css';
+import './styles/night-league.css';
 import App from './App';
 import { APP_NAME } from './config';
 import { ThemeProvider } from './context/ThemeContext';
@@ -20,6 +23,8 @@ import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
 import { RealtimeProvider } from './context/RealtimeContext';
 import { AppDataProvider } from './context/AppDataContext';
+import { ConfirmProvider } from './components/ui';
+import MotionPreference from './context/MotionPreference';
 
 document.title = APP_NAME;
 
@@ -31,7 +36,11 @@ createRoot(document.getElementById('root')).render(
           <AuthProvider>
             <RealtimeProvider>
               <AppDataProvider>
-                <App />
+                <MotionPreference>
+                  <ConfirmProvider>
+                    <App />
+                  </ConfirmProvider>
+                </MotionPreference>
               </AppDataProvider>
             </RealtimeProvider>
           </AuthProvider>

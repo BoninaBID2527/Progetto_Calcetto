@@ -24,7 +24,7 @@ async function me(req, res) {
 async function updateMe(req, res) {
   const { settings, ...rest } = req.body;
   const update = { ...rest };
-  if (settings) update['settings.nicknameMode'] = settings.nicknameMode;
+  for (const [key, value] of Object.entries(settings || {})) update[`settings.${key}`] = value;
   const user = await User.findByIdAndUpdate(req.user._id, { $set: update }, { new: true, runValidators: true });
   res.json({ user: selfUser(user) });
 }

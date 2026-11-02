@@ -1,3 +1,4 @@
+import { LeaderboardRow } from './ui';
 import { Avatar, PlayerName } from './Avatar';
 
 /** Podio con i primi tre: in ordine visivo secondo, primo, terzo. */
@@ -35,30 +36,11 @@ export default function Podium({ entries }) {
   );
 }
 
-export function RankRows({ entries, meId }) {
+export function RankRows({ entries, meId, linkFor }) {
   return (
     <ol className="rank-rows">
       {entries.map((e) => (
-        <li key={e.user.id} className={`rank-row ${e.user.id === meId ? 'is-me' : ''}`}>
-          <span className="pos" aria-label={`${e.position}° posto`}>
-            {e.position}
-          </span>
-          <span className="body">
-            <span className="player">
-              <Avatar user={e.user} size={34} />
-              <span className="player-text">
-                <span className="player-name">
-                  <PlayerName user={e.user} />
-                </span>
-                <span className="player-sub">{e.detail}</span>
-              </span>
-            </span>
-            <span className="progress" aria-hidden="true">
-              <span style={{ width: `${Math.round(e.bar * 100)}%` }} />
-            </span>
-          </span>
-          <span className="value">{e.display}</span>
-        </li>
+        <LeaderboardRow key={e.user.id} entry={e} isMe={e.user.id === meId} to={linkFor?.(e)} />
       ))}
     </ol>
   );

@@ -22,7 +22,7 @@ function selfUser(user) {
   return {
     ...publicUser(user),
     email: user.email,
-    settings: { nicknameMode: user.settings?.nicknameMode || 'accanto' },
+    settings: { nicknameMode: user.settings?.nicknameMode || 'accanto', motion: user.settings?.motion || 'auto' },
     createdAt: user.createdAt,
   };
 }

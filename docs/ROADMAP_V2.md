@@ -7,8 +7,8 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | # | Milestone | Stato |
 |---|---|---|
 | M0 | Audit del repository e roadmap | ✅ |
-| M1 | Architettura dei nuovi modelli e contratti API (docs/ARCHITETTURA.md) | ⏳ |
-| M2 | Design system NIGHT LEAGUE: token, font, Lucide, Motion, componenti, shell responsive | ⏳ |
+| M1 | Architettura dei nuovi modelli e contratti API (docs/ARCHITETTURA.md) | ✅ |
+| M2 | Design system NIGHT LEAGUE: token, font, Lucide, Motion, componenti, shell responsive | ✅ |
 | M3 | Dashboard "Spogliatoio" con hero MATCHDAY, azioni rapide, feed attività; restyling gruppi e partite | ⏳ |
 | M4 | BONCALL: convocazioni, risposte atomiche, conversione idempotente, promemoria, notifiche in-app | ⏳ |
 | M5 | PWA e Web Push (service worker, VAPID, subscription, preferenze, fasce silenziose) | ⏳ |
@@ -117,3 +117,16 @@ Quello della tabella "Avanzamento". Motivo: prima i contratti e il design system
 ## Registro delle milestone
 
 Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test eseguiti, cosa non è stato verificato.
+
+### M1 — Architettura (✅)
+`docs/ARCHITETTURA.md`: principi, modelli estesi e nuovi, regole BONCALL, notifiche e push, algoritmo BONCARD/overall, stagioni, endpoint, sicurezza, struttura frontend.
+
+### M2 — Design system NIGHT LEAGUE (✅)
+- Token: palette del prompt (fondo `#090D0C`, lime `#C7FF36`, oro `#F5D98C`, arancio `#FF704A`), varianti di testo con contrasto AA calcolato, tema chiaro completo, scala tipografica responsive, luce "da stadio" statica sullo sfondo.
+- Font locali: Barlow Condensed (titoli, numeri), Space Grotesk (titoli editoriali), Inter (testo).
+- Icone: tutte Lucide dietro `components/Icon.jsx` (stessi nomi di prima).
+- Componenti in `components/ui/`: Button, IconButton, Card, CardHeader, StatCard, CountUp, Countdown, Badge, ProgressBar, Tooltip, Skeleton, EmptyState, ErrorState, Modal, BottomSheet, ConfirmDialog (`useConfirm`, sostituisce ogni `window.confirm`), FormField, FormAlert, SegmentedControl (frecce da tastiera), Tabs/TabPanel, SlotsBar, StatusPill, NotificationItem, LeaderboardRow.
+- `components/brand/BrandLogo.jsx` con varianti completa/compatta e toni auto/onDark/onLight/mono; logo dichiarato provvisorio.
+- Shell: navigazione da un'unica mappa (`layouts/navigation.js`), sidebar a sezioni, barra in basso con "Crea" e "Altro" in bottom sheet, transizione tra pagine con Motion, preferenza "animazioni ridotte" nel profilo (salvata in `settings.motion`) oltre a `prefers-reduced-motion`.
+- Test: 101 backend verdi; build di produzione riuscita; screenshot 390/1280 di partite e scheda partita senza overflow.
+- Non verificato in questa milestone: axe-core sulle nuove schermate (si rifà in M16).
