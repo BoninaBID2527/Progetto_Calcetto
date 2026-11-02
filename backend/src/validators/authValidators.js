@@ -32,6 +32,18 @@ const updateMe = z
     preferredRole: z.enum(ROLE_KEYS).nullable(),
     foot: z.enum(FOOT_KEYS).nullable(),
     settings: z.object({ nicknameMode: z.enum(['accanto', 'sostituisci']), motion: z.enum(['auto', 'ridotto']) }).partial().strict(),
+    notificationPrefs: z
+      .object({
+        push: z.boolean(),
+        categories: z.object({ boncall: z.boolean(), partite: z.boolean(), promemoria: z.boolean(), risultati: z.boolean(), social: z.boolean() }).partial().strict(),
+        quietHours: z
+          .object({ enabled: z.boolean(), start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Orario HH:MM.'), end: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Orario HH:MM.') })
+          .partial()
+          .strict(),
+        maxPushPerHour: z.number().int().min(1).max(30),
+      })
+      .partial()
+      .strict(),
   })
   .partial()
   .strict();

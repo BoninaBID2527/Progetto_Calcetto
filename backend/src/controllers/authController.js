@@ -25,6 +25,12 @@ async function updateMe(req, res) {
   const { settings, ...rest } = req.body;
   const update = { ...rest };
   for (const [key, value] of Object.entries(settings || {})) update[`settings.${key}`] = value;
+  const { notificationPrefs } = req.body;
+  delete update.notificationPrefs;
+  for (const [key, value] of Object.entries(notificationPrefs || {})) {
+    if (value && typeof value === 'object') for (const [k, v] of Object.entries(value)) update[`notificationPrefs.${key}.${k}`] = v;
+    else update[`notificationPrefs.${key}`] = value;
+  }
   const user = await User.findByIdAndUpdate(req.user._id, { $set: update }, { new: true, runValidators: true });
   res.json({ user: selfUser(user) });
 }

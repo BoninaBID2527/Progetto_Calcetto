@@ -11,7 +11,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M2 | Design system NIGHT LEAGUE: token, font, Lucide, Motion, componenti, shell responsive | ✅ |
 | M3 | Dashboard "Spogliatoio" con hero MATCHDAY, azioni rapide, feed attività; restyling gruppi e partite | ✅ |
 | M4 | BONCALL: convocazioni, risposte atomiche, conversione idempotente, promemoria, notifiche in-app | ✅ |
-| M5 | PWA e Web Push (service worker, VAPID, subscription, preferenze, fasce silenziose) | ⏳ |
+| M5 | PWA e Web Push (service worker, VAPID, subscription, preferenze, fasce silenziose) | ✅ |
 | M6 | BONCARD e BONRATING (attributi, overall, edizioni, progressione, esportazione PNG) | ⏳ |
 | M7 | MATCHDAY e formazioni, Bilancia migliorato, locandina esportabile | ⏳ |
 | M8 | Rivalità | ⏳ |
@@ -146,3 +146,9 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Seed: due convocazioni dimostrative aggiunte solo se il gruppo non ne ha.
 - Test: 124 backend verdi (15 BONCALL: concorrenza sull'ultimo posto, conversioni simultanee, deduplica, preferenze, scadenze); e2e `boncall.spec.js` con due browser verde.
 - Non ancora: invio push (M5). `pushService` per ora segna `pushStatus: "saltata"`.
+
+### M5 — PWA e Web Push (✅)
+- Backend: `web-push` con VAPID da `.env` (`npm run vapid` genera le chiavi), modello `PushSubscription` (endpoint unico, solo https, massimo 10 per utente, segue l'ultimo account del browser), `pushService` con regole: consenso esplicito, categoria, fascia silenziosa in Europe/Rome, limite orario, eliminazione delle subscription scadute (404/410) o con 5 errori; invio in background (`idle()` per i test). Rotte `/push/config`, `/push/subscriptions` (POST/DELETE), `/push/test`. Preferenze aggiornabili a pezzi in `PATCH /users/me`.
+- Frontend: `manifest.webmanifest`, icone PNG (any, maskable, apple-touch, badge), `sw.js` (pagine rete-prima con pagina offline, asset in cache, API e Socket.IO mai in cache, push con deep link, badge), `offline.html` che si ricarica da sola al ritorno della rete; impostazioni notifiche nel profilo (attivazione solo al clic, spiegazione per iOS e browser senza supporto, prova, categorie, fascia silenziosa, limite orario), installazione dell'app, badge sull'icona, riallineamento quando si torna all'app.
+- Test: 132 backend verdi (8 sulle push con trasporto finto); e2e `pwa.spec.js` (manifest e icone, service worker attivo, offline, nessuna API in cache, nessuna richiesta di permesso al caricamento, errore spiegato senza VAPID); suite e2e completa 13/13 verde, axe compreso.
+- **Non verificato:** consegna reale di una push. In questo ambiente non c'è nessun servizio push raggiungibile (FCM, Mozilla, Apple) e nessun dispositivo: la sottoscrizione di Chromium fallirebbe e l'invio è stato provato solo con un trasporto sostituito. Va verificato su un telefono vero con le chiavi VAPID configurate e il sito servito in HTTPS (o su localhost).

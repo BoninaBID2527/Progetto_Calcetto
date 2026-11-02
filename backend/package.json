@@ -13,7 +13,8 @@
     "seed": "node src/scripts/seed.js",
     "test": "jest --runInBand",
     "db:lite": "node dev/mongo-lite/cli.js",
-    "migrate": "node src/scripts/migrate.js"
+    "migrate": "node src/scripts/migrate.js",
+    "vapid": "node src/scripts/vapid.js"
   },
   "jest": {
     "testEnvironment": "node",
@@ -34,6 +35,7 @@
     "mongoose": "^8.24.7",
     "morgan": "^1.12.1",
     "socket.io": "^4.8.4",
+    "web-push": "^3.6.7",
     "zod": "^3.25.76"
   },
   "devDependencies": {

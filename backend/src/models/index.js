@@ -12,6 +12,7 @@ module.exports = {
   Notification: require('./Notification'),
   Activity: require('./Activity'),
   Poll: require('./Poll'),
+  PushSubscription: require('./PushSubscription'),
   MvpVote,
   Rating,
   PrizeVote,

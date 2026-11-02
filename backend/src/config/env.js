@@ -16,6 +16,12 @@ const config = {
   clientOrigin: (process.env.CLIENT_ORIGIN || 'http://localhost:5173').split(',').map((s) => s.trim()),
   schedulerEnabled: process.env.SCHEDULER_ENABLED !== 'false' && nodeEnv !== 'test',
   schedulerIntervalMs: Number(process.env.SCHEDULER_INTERVAL_MS) || 60_000,
+  // Web Push: senza le due chiavi le push restano spente (le notifiche in-app funzionano comunque).
+  vapid: {
+    publicKey: process.env.VAPID_PUBLIC_KEY || '',
+    privateKey: process.env.VAPID_PRIVATE_KEY || '',
+    subject: process.env.VAPID_SUBJECT || 'mailto:admin@bonmatch.invalid',
+  },
 };
 
 if (!config.jwtSecret) {

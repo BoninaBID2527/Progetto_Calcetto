@@ -23,6 +23,12 @@ function selfUser(user) {
     ...publicUser(user),
     email: user.email,
     settings: { nicknameMode: user.settings?.nicknameMode || 'accanto', motion: user.settings?.motion || 'auto' },
+    notificationPrefs: {
+      push: Boolean(user.notificationPrefs?.push),
+      categories: { boncall: true, partite: true, promemoria: true, risultati: true, social: true, ...(user.notificationPrefs?.categories || {}) },
+      quietHours: { enabled: true, start: '23:00', end: '08:00', ...(user.notificationPrefs?.quietHours || {}) },
+      maxPushPerHour: user.notificationPrefs?.maxPushPerHour || 6,
+    },
     createdAt: user.createdAt,
   };
 }

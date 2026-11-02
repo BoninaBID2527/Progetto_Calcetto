@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import { useAuth } from './AuthContext';
 import { useOnReconnect, useRealtimeEvent } from './RealtimeContext';
 import { useToast } from './ToastContext';
+import { setAppBadge } from '../utils/pwa';
 
 const AppDataContext = createContext(null);
 const ACTIVE_KEY = 'bonmatch.activeGroup';
@@ -44,6 +45,17 @@ export function AppDataProvider({ children }) {
     refreshGroups().catch(() => setGroups([]));
     refreshNotifications().catch(() => {});
   }, [user, refreshGroups, refreshNotifications]);
+
+  // Badge sull'icona dell'app installata, dove supportato.
+  useEffect(() => setAppBadge(notifications.unread), [notifications.unread]);
+
+  // Tornando all'app (es. dopo una push) si riallinea con il server.
+  useEffect(() => {
+    if (!user) return undefined;
+    const onVisible = () => document.visibilityState === 'visible' && refreshNotifications().catch(() => {});
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [user, refreshNotifications]);
 
   useOnReconnect(() => {
     refreshGroups().catch(() => {});

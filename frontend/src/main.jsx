@@ -19,6 +19,7 @@ import './styles/night-league.css';
 import './styles/dashboard.css';
 import './styles/boncall.css';
 import App from './App';
+import { registerServiceWorker } from './utils/pwa';
 import { APP_NAME } from './config';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
@@ -29,6 +30,7 @@ import { ConfirmProvider } from './components/ui';
 import MotionPreference from './context/MotionPreference';
 
 document.title = APP_NAME;
+registerServiceWorker();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

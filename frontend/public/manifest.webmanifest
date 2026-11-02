@@ -1,0 +1,21 @@
+{
+  "name": "BONMATCH — il calcetto tra amici",
+  "short_name": "BONMATCH",
+  "description": "Convocazioni, partite, squadre, MVP e classifiche del tuo gruppo di calcetto.",
+  "lang": "it",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#090D0C",
+  "theme_color": "#090D0C",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Cerca giocatori", "url": "/gruppi", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Notifiche", "url": "/notifiche", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

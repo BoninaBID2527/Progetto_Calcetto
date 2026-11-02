@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useToast } from '../context/ToastContext';
 import { ROLES, FEET } from '../config';
+import NotificationSettings from '../components/NotificationSettings';
 
 /** Ridimensiona l'immagine scelta a 256×256 (ritaglio centrale) e la restituisce come data URL. */
 function resizeImage(file, size = 256) {
@@ -168,6 +169,7 @@ export default function Profile() {
               />
             </div>
           </section>
+          <NotificationSettings />
           <section className="card stack">
             <button
               type="button"
