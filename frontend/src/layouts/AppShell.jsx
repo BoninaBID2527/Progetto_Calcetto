@@ -68,7 +68,6 @@ export default function AppShell() {
   const { theme, toggle } = useTheme();
   const groupMatch = useMatch('/gruppi/:groupId/*');
   const { items, base, hasGroup } = useNavItems();
-  const navigate = useNavigate();
   const routeGroupId = groupMatch?.params.groupId;
 
   useEffect(() => {
@@ -129,7 +128,6 @@ export default function AppShell() {
               title="Esci"
               onClick={async () => {
                 await logout();
-                navigate('/');
               }}
             >
               <Icon name="logout" />

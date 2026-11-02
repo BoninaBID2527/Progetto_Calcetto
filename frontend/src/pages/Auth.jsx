@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import Logo from '../components/Logo';
+import Logo, { LogoMark, Wordmark } from '../components/Logo';
 import Icon from '../components/Icon';
 import FieldBadge from '../components/FieldBadge';
 import { FormAlert, FormField } from '../components/ui';
@@ -17,7 +17,10 @@ function AuthLayout({ title, subtitle, children }) {
   return (
     <div className="auth">
       <aside className="auth-art" aria-hidden="true">
-        <Logo />
+        <span className="logo">
+          <LogoMark />
+          <Wordmark />
+        </span>
         <div className="stack" style={{ gap: 'var(--space-5)' }}>
           <h2>
             Il campo è prenotato.

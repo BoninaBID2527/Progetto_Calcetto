@@ -22,7 +22,8 @@
   --c-primary-text: #2ee59d;
   --c-primary-soft: rgba(46, 229, 157, 0.14);
   --c-orange: #ff8a3d;
-  --c-orange-text: #ff8a3d;
+  /* Un filo più chiaro dell'accento: resta AA anche sulle righe evidenziate. */
+  --c-orange-text: #ffa062;
   --c-orange-soft: rgba(255, 138, 61, 0.15);
   --c-yellow: #ffd23f;
   --c-yellow-text: #ffd23f;

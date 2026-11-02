@@ -7,6 +7,8 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setTokenState] = useState(getToken());
   const [ready, setReady] = useState(!getToken());
+  // Distingue l'uscita volontaria (si torna alla landing) dalla sessione scaduta (si va al login).
+  const [loggedOut, setLoggedOut] = useState(false);
 
   const clear = useCallback(() => {
     setToken(null);
@@ -27,6 +29,7 @@ export function AuthProvider({ children }) {
   }, [token, user, clear]);
 
   const start = useCallback((res) => {
+    setLoggedOut(false);
     setToken(res.token);
     setTokenState(res.token);
     setUser(res.user);
@@ -42,6 +45,7 @@ export function AuthProvider({ children }) {
     try {
       await api('/auth/logout', { method: 'POST' });
     } finally {
+      setLoggedOut(true);
       clear();
     }
   }, [clear]);
@@ -53,8 +57,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, token, ready, login, register, logout, updateProfile, nicknameMode: user?.settings?.nicknameMode || 'accanto' }),
-    [user, token, ready, login, register, logout, updateProfile]
+    () => ({ user, token, ready, loggedOut, login, register, logout, updateProfile, nicknameMode: user?.settings?.nicknameMode || 'accanto' }),
+    [user, token, ready, loggedOut, login, register, logout, updateProfile]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

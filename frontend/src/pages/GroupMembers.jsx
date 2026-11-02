@@ -157,7 +157,8 @@ function InviteCard({ group, isAdmin }) {
         <Icon name="link" /> Invita gli amici
       </h2>
       <p className="muted">Manda il codice o il link: chi lo apre entra nel gruppo.</p>
-      <div className="invite-code" aria-label={`Codice d'invito: ${group.inviteCode.split('').join(' ')}`}>
+      <div className="invite-code">
+        <span className="visually-hidden">Codice d'invito: {group.inviteCode.split('').join(' ')}</span>
         {group.inviteCode.split('').map((c, i) => (
           <span key={i} aria-hidden="true">
             {c}
@@ -386,8 +387,9 @@ export default function GroupMembers() {
                 const details = [roleLabel(m.user.preferredRole), footLabel(m.user.foot) && `piede ${footLabel(m.user.foot).toLowerCase()}`].filter(Boolean).join(' · ');
                 return (
                   <li key={m.user.id} className="list-item" style={{ flexWrap: 'wrap' }}>
-                    <button type="button" className="grow" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left', minWidth: 180 }} onClick={() => setNicknameFor(m)} aria-label={`Soprannome di ${m.user.name}`}>
+                    <button type="button" className="grow" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left', minWidth: 180 }} onClick={() => setNicknameFor(m)}>
                       <Player user={m.user} size={44} sub={[details, isAdmin ? m.user.email : null].filter(Boolean).join(' · ') || (self ? 'Sei tu' : null)} />
+                      <span className="visually-hidden">: gestisci il soprannome</span>
                     </button>
                     {m.role === 'admin' && (
                       <span className="chip chip-yellow">

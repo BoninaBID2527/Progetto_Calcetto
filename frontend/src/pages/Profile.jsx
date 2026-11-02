@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon';
 import { Avatar } from '../components/Avatar';
 import { FormAlert, FormField, Segmented } from '../components/ui';
@@ -34,7 +33,6 @@ export default function Profile() {
   const { user, updateProfile, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const toast = useToast();
-  const navigate = useNavigate();
   const fileRef = useRef(null);
   const [form, setForm] = useState({
     name: user.name,
@@ -162,7 +160,6 @@ export default function Profile() {
               className="btn btn-danger"
               onClick={async () => {
                 await logout();
-                navigate('/');
               }}
             >
               <Icon name="logout" /> Esci da questo dispositivo

@@ -26,9 +26,10 @@ function Splash() {
 }
 
 function RequireAuth({ children }) {
-  const { user, ready } = useAuth();
+  const { user, ready, loggedOut } = useAuth();
   const location = useLocation();
   if (!ready) return <Splash />;
+  if (!user && loggedOut) return <Navigate to="/" replace />;
   if (!user) return <Navigate to={`/accedi?next=${encodeURIComponent(location.pathname)}`} replace />;
   return children;
 }
