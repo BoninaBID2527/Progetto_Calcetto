@@ -101,6 +101,10 @@ const matchSchema = new Schema(
       type: [new Schema({ key: String, users: [{ type: Schema.Types.ObjectId, ref: 'User' }] }, { _id: false })],
       default: [],
     },
+    // Partita ricorrente: serie di origine, data locale dell'occorrenza (chiave idempotente) e modifica singola.
+    series: { type: Schema.Types.ObjectId, ref: 'MatchSeries', default: undefined },
+    occurrenceKey: { type: String, default: undefined },
+    detached: { type: Boolean, default: false },
     reminderSentAt: { type: Date, default: null },
     // Convocazione BONCALL da cui è nata la partita (al massimo una partita per convocazione).
     fromPoll: { type: Schema.Types.ObjectId, ref: 'Poll', default: undefined },
@@ -110,6 +114,7 @@ const matchSchema = new Schema(
 
 matchSchema.index({ group: 1, startsAt: -1 });
 matchSchema.index({ status: 1, startsAt: 1 });
+matchSchema.index({ series: 1, occurrenceKey: 1 }, { unique: true, partialFilterExpression: { series: { $type: 'objectId' } } });
 matchSchema.index({ fromPoll: 1 }, { unique: true, partialFilterExpression: { fromPoll: { $type: 'objectId' } } });
 
 module.exports = model('Match', matchSchema);

@@ -162,6 +162,7 @@ async function update(match, data) {
   if (!['aperta', 'chiusa'].includes(match.status)) throw conflict('Una partita già giocata o annullata non si può modificare.');
   if (data.startsAt) assertFuture(data.startsAt);
   const { slots, ...set } = data;
+  if (match.series) set.detached = true; // modifica singola: gli aggiornamenti della serie non la toccano più
   const withSet = (extra) => (Object.keys(set).length ? { $set: set, ...extra } : extra);
   let updated;
   if (slots !== undefined && slots !== match.slots) {

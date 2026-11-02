@@ -5,6 +5,7 @@ const matchService = require('../services/matchService');
 const votingService = require('../services/votingService');
 const notificationService = require('../services/notificationService');
 const pollService = require('../services/pollService');
+const seriesService = require('../services/seriesService');
 const { sameId } = require('../utils/helpers');
 
 const DAY = 86_400_000;
@@ -41,7 +42,8 @@ async function tick(now = new Date()) {
   const closed = await matchService.autoClose(now);
   const finalized = await votingService.finalizeExpired(now);
   const polls = await pollService.runJobs(now);
-  return { reminders, closed, finalized, polls };
+  const recurring = await seriesService.materializeAll(now);
+  return { reminders, closed, finalized, polls, recurring };
 }
 
 let timer = null;

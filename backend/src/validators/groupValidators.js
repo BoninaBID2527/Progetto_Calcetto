@@ -1,6 +1,7 @@
 'use strict';
 
 const { z, trimmed, int, objectId } = require('./common');
+const { isValidZone } = require('../utils/zone');
 
 const color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Colore non valido (formato #RRGGBB).');
 const emoji = z.string().trim().min(1).max(8);
@@ -19,6 +20,7 @@ const settings = z
     organizers: z.enum(['tutti', 'admin']),
     minMatchesForRanking: int(1, 50),
     loserPaysFirstRound: z.boolean(),
+    timezone: z.string().refine(isValidZone, 'Fuso orario non valido (es. Europe/Rome).'),
     extraPrizeOptions: z.array(z.object({ label: trimmed(1, 24), emoji }).strict()).max(5),
     awards: z
       .object({

@@ -91,7 +91,7 @@ export default function NewMatch() {
   const { group } = useOutletContext();
   const navigate = useNavigate();
   const toast = useToast();
-  const [form, setForm] = useState({ field: FIELDS[0].key, date: localDate(1), time: '21:00', durationMinutes: DEFAULTS.durationMinutes, cost: '', slots: DEFAULTS.slots, notes: '' });
+  const [form, setForm] = useState({ field: FIELDS[0].key, date: localDate(1), time: '21:00', durationMinutes: DEFAULTS.durationMinutes, cost: '', slots: DEFAULTS.slots, notes: '', repeat: false, until: '' });
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
@@ -109,6 +109,16 @@ export default function NewMatch() {
       return;
     }
     try {
+      if (form.repeat) {
+        const weekday = new Date(`${form.date}T00:00:00Z`).getUTCDay() || 7;
+        const res = await api(`/groups/${group.id}/series`, {
+          method: 'POST',
+          body: { field: form.field, weekday, time: form.time, startsOn: form.date, endsOn: form.until || null, durationMinutes: Number(form.durationMinutes), costCents: Number.isFinite(costCents) ? costCents : -1, slots: Number(form.slots), notes: form.notes },
+        });
+        toast.success(`Ricorrenza creata: ${res.created} partite in programma.`);
+        navigate('/calendario');
+        return;
+      }
       const { match } = await api(`/groups/${group.id}/matches`, {
         method: 'POST',
         body: {
@@ -155,6 +165,20 @@ export default function NewMatch() {
             <FormField label="Ora d'inizio">
               {(p) => <input {...p} className="input" type="time" step="900" value={form.time} onChange={(e) => set({ time: e.target.value })} />}
             </FormField>
+          </div>
+          <div className="field">
+            <label className="check-row">
+              <input type="checkbox" checked={form.repeat} onChange={(e) => set({ repeat: e.target.checked })} />
+              <span>
+                <strong>Ripeti ogni settimana</strong>
+                <span className="player-sub">Le prossime 4 settimane vengono create subito, le altre man mano. Ogni partita si può modificare o annullare da sola.</span>
+              </span>
+            </label>
+            {form.repeat && (
+              <FormField label="Fino al (facoltativo)" error={error?.fields?.endsOn}>
+                {(p) => <input {...p} className="input" type="date" min={form.date} value={form.until} onChange={(e) => set({ until: e.target.value })} />}
+              </FormField>
+            )}
           </div>
           <div className="field">
             <span className="label" id="duration-label">

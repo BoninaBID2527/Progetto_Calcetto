@@ -21,6 +21,7 @@ import MatchDetail from './pages/MatchDetail';
 import GroupRankings from './pages/GroupRankings';
 import HallOfFame from './pages/HallOfFame';
 import Club from './pages/Club';
+import Calendar from './pages/Calendar';
 import GroupChat from './pages/GroupChat';
 import GroupMembers from './pages/GroupMembers';
 import Notifications from './pages/Notifications';
@@ -73,6 +74,7 @@ export default function App() {
       <Route path="/registrati" element={<GuestOnly><Register /></GuestOnly>} />
       <Route element={<RequireAuth><AppShell /></RequireAuth>}>
         <Route path="/gruppi" element={<Groups />} />
+        <Route path="/calendario" element={<Calendar />} />
         <Route path="/entra/:code" element={<JoinByLink />} />
         <Route path="/gruppi/:groupId" element={<GroupLayout />}>
           <Route index element={<Dashboard />} />

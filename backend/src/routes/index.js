@@ -12,6 +12,8 @@ router.use('/auth', require('./authRoutes'));
 router.use('/users', require('./userRoutes'));
 router.use('/groups', require('./groupRoutes'));
 router.use('/matches', require('./matchRoutes'));
+router.use('/calendar', require('./calendarRoutes'));
+router.use('/series', require('./seriesRoutes'));
 router.use('/polls', require('./pollRoutes'));
 router.use('/push', require('./pushRoutes'));
 router.use('/rivalries', require('./rivalryRoutes'));

@@ -17,6 +17,7 @@ const { validate, validIds } = require('../middleware/validate');
 const gv = require('../validators/groupValidators');
 const mv = require('../validators/matchValidators');
 const cv = require('../validators/chatValidators');
+const calCtrl = require('../controllers/calendarController');
 
 const router = Router();
 router.use(requireAuth);
@@ -57,6 +58,11 @@ router.get('/:groupId/players/:userId/achievements', inGroup, validIds('userId')
 router.get('/:groupId/rivalries', inGroup, rivalryCtrl.list);
 router.post('/:groupId/rivalries', inGroup, validate({ body: gv.proposeRivalry }), rivalryCtrl.propose);
 router.get('/:groupId/rivalries/:userId', inGroup, validIds('userId'), validate({ query: gv.versusQuery }), rivalryCtrl.detail);
+router.get('/:groupId/series', inGroup, calCtrl.listSeries);
+router.post('/:groupId/series', inGroup, validate({ body: mv.createSeries }), calCtrl.createSeries);
+router.get('/:groupId/availability', inGroup, validate({ query: mv.availabilityQuery }), calCtrl.availability);
+router.put('/:groupId/availability/:date', inGroup, validate({ body: mv.setAvailability }), calCtrl.setAvailability);
+router.delete('/:groupId/availability/:date', inGroup, calCtrl.clearAvailability);
 router.get('/:groupId/seasons', inGroup, ctrl.listSeasons);
 router.post('/:groupId/seasons', admin, validate({ body: gv.createSeason }), ctrl.createSeason);
 router.delete('/:groupId/seasons/:seasonId', admin, validIds('seasonId'), ctrl.removeSeason);

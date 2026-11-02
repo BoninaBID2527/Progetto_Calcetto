@@ -18,7 +18,7 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M9 | Stagioni, nuove classifiche, Hall of Fame | ✅ |
 | M10 | Premi partita e achievement | ✅ |
 | M11 | Club personalizzati (stemma, colori, maglie, copertina) | ✅ |
-| M12 | Calendario intelligente e partite ricorrenti | ⏳ |
+| M12 | Calendario intelligente e partite ricorrenti | ✅ |
 | M13 | Cassa del gruppo (registro dichiarato/verificato) | ⏳ |
 | M14 | Terzo tempo evoluto | ⏳ |
 | M15 | BONWRAPPED | ⏳ |
@@ -196,3 +196,11 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Frontend: pagina `/gruppi/:id/club` (voce "Il club") con copertina, stemma, motto, statistiche, maglie disegnate in SVG con i colori scelti, editor admin con anteprima e controlli lato client (tipo e peso); lo stemma sostituisce l'emoji in intestazione e nell'elenco gruppi, con il simbolo e il colore come fallback grafico. Il client API accetta `FormData`.
 - Test: 183 backend verdi (7 nuovi in `club.test.js`). Verificato a mano il caricamento dal browser, compreso un SVG rinominato `.png` (rifiutato dal server).
 - Limite: nessun ridimensionamento lato server (non c'è libreria di immagini): i limiti di peso servono a questo; l'admin deve caricare immagini già piccole.
+
+### M12 — Calendario e partite ricorrenti (✅)
+- `utils/zone.js`: conversione orario locale ↔ UTC per qualsiasi fuso IANA con ora legale (nessuna libreria), data locale, giorno ISO. `Group.settings.timezone` (default `Europe/Rome`, validato come fuso reale) governa generazione delle ricorrenze, calendario ed esportazione.
+- `MatchSeries` (giorno ISO, orario locale, campo, posti, costo, inizio/fine) e occorrenze come normali `Match` con `series`, `occurrenceKey` (data locale) e indice unico parziale `{series, occurrenceKey}`: la generazione (alla creazione, poi dal programma periodico) è **idempotente** anche in parallelo e non ricrea mai un'occorrenza annullata o modificata. Orizzonte 28 giorni. La modifica di una singola partita la "stacca" dalla serie (`detached`); la modifica della serie si propaga solo alle occorrenze future aperte, senza iscritti e non staccate. Fine della serie con o senza annullamento (notificato) delle prossime. Permessi: crea chi può creare partite; modifica/ferma solo l'autore o un admin.
+- Calendario: `GET /calendar?from&to[&group]` (partite e convocazioni dei gruppi dell'utente, max 100 giorni), disponibilità per giorno (`GET/PUT/DELETE /groups/:id/availability`, una per utente e giorno, non nel passato, elenco dei disponibili visibile al gruppo), `GET /calendar/export.ics` (iCalendar con UTC, UID stabile, righe piegate a 75 byte, testo con escape; solo partite non annullate dei propri gruppi). Rotte serie: `GET/POST /groups/:id/series`, `PATCH/DELETE /series/:sid`.
+- Frontend: `/calendario` con vista mese, settimana, prossime e passate, filtro per gruppo, dettaglio del giorno, disponibilità, pannello ricorrenze (modifica, ferma, ferma e annulla), esportazione `.ics` (con token nell'header, nessun URL di sottoscrizione pubblico), "Ripeti ogni settimana" in Nuova partita. Verificato a 1280 e 390 px senza overflow.
+- Test: 200 backend verdi (17 nuovi in `calendar.test.js`: ora legale 2026/2027, idempotenza in parallelo, occorrenze annullate/modificate, permessi, fuso del gruppo, calendario, disponibilità, `.ics`).
+- Limiti: niente sottoscrizione `webcal://` (richiederebbe un token nell'URL); il fuso si imposta via API (`settings.timezone`) ma non ha ancora un campo nelle impostazioni dell'interfaccia; le frecce del calendario non gestiscono gesti di scorrimento.

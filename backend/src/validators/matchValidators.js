@@ -1,6 +1,7 @@
 'use strict';
 
 const { z, int, objectId } = require('./common');
+const { isYmd } = require('../utils/zone');
 const { FIELD_KEYS, RESPONSES, DEFAULTS } = require('../config/appConfig');
 
 const startsAt = z
@@ -56,6 +57,35 @@ const ratings = z
   .strict();
 const prizeVote = z.object({ option: z.string().trim().min(1).max(40) }).strict();
 
+const ymd = z.string().refine(isYmd, 'Data non valida (AAAA-MM-GG).');
+const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Orario non valido (HH:MM).');
+const seriesFields = {
+  field: matchFields.field,
+  weekday: int(1, 7),
+  time,
+  startsOn: ymd,
+  endsOn: ymd.nullable(),
+  slots: matchFields.slots,
+  durationMinutes: matchFields.durationMinutes,
+  costCents: matchFields.costCents,
+  notes: matchFields.notes,
+};
+const createSeries = z
+  .object({
+    ...seriesFields,
+    endsOn: seriesFields.endsOn.default(null),
+    slots: seriesFields.slots.default(DEFAULTS.slots),
+    durationMinutes: seriesFields.durationMinutes.default(DEFAULTS.durationMinutes),
+    costCents: seriesFields.costCents.default(0),
+    notes: seriesFields.notes.default(''),
+  })
+  .strict();
+const updateSeries = z.object({ ...seriesFields }).omit({ startsOn: true }).partial().strict();
+const endSeries = z.object({ cancelFuture: z.enum(['true', 'false']).default('false').transform((v) => v === 'true') });
+const calendarQuery = z.object({ from: ymd, to: ymd, group: objectId.optional() });
+const exportQuery = z.object({ group: objectId.optional() });
+const availabilityQuery = z.object({ from: ymd, to: ymd });
+const setAvailability = z.object({ status: z.enum(['disponibile', 'forse', 'non_disponibile']) }).strict();
 const awardVote = z.object({ nominee: z.string().regex(/^[a-f\d]{24}$/i, 'Identificativo non valido.') }).strict();
 const awardAssign = z.object({ userIds: z.array(z.string().regex(/^[a-f\d]{24}$/i, 'Identificativo non valido.')).min(1).max(3) }).strict();
 const rankings = z.object({ period: z.enum(['mese', 'stagione', 'sempre']).default('sempre'), season: z.string().trim().min(1).max(40).optional() });
@@ -77,5 +107,12 @@ module.exports = {
   rankings,
   cardScope,
   awardVote,
+  createSeries,
+  updateSeries,
+  endSeries,
+  calendarQuery,
+  exportQuery,
+  availabilityQuery,
+  setAvailability,
   awardAssign,
 };
