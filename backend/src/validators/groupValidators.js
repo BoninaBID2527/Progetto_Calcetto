@@ -20,6 +20,7 @@ const settings = z
     minMatchesForRanking: int(1, 50),
     loserPaysFirstRound: z.boolean(),
     extraPrizeOptions: z.array(z.object({ label: trimmed(1, 24), emoji }).strict()).max(5),
+    season: z.object({ mode: z.enum(['annuale', 'trimestrale', 'mensile', 'personalizzata']), startMonth: int(1, 12) }).partial().strict(),
   })
   .partial()
   .strict();
@@ -37,6 +38,11 @@ const proposeNickname = z.object({ targetUserId: objectId, text: trimmed(2, 30) 
 const replaceNickname = z.object({ text: trimmed(2, 30) }).strict();
 const listNicknames = z.object({ userId: objectId.optional() });
 const proposeRivalry = z.object({ targetUserId: objectId }).strict();
+const isoDate = z.string().datetime({ offset: true }).transform((v) => new Date(v));
+const createSeason = z
+  .object({ name: trimmed(2, 40), startsAt: isoDate, endsAt: isoDate })
+  .strict()
+  .refine((v) => v.endsAt > v.startsAt, { path: ['endsAt'], message: "La fine deve venire dopo l'inizio." });
 const versusQuery = z.object({ with: objectId.optional() });
 
-module.exports = { proposeRivalry, versusQuery, createGroup, updateGroup, join, setRole, proposeNickname, replaceNickname, listNicknames };
+module.exports = { createSeason, proposeRivalry, versusQuery, createGroup, updateGroup, join, setRole, proposeNickname, replaceNickname, listNicknames };

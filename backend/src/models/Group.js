@@ -36,6 +36,10 @@ const groupSchema = new Schema(
       minMatchesForRanking: { type: Number, default: DEFAULTS.minMatchesForRanking, min: 1, max: 50 },
       loserPaysFirstRound: { type: Boolean, default: false },
       extraPrizeOptions: { type: [prizeOptionSchema], default: [] },
+      season: {
+        mode: { type: String, enum: ['annuale', 'trimestrale', 'mensile', 'personalizzata'], default: 'annuale' },
+        startMonth: { type: Number, min: 1, max: 12, default: 9 },
+      },
     },
   },
   { timestamps: true }

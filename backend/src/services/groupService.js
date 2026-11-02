@@ -26,6 +26,7 @@ function summary(group, userId, extra = {}) {
       minMatchesForRanking: group.settings.minMatchesForRanking,
       loserPaysFirstRound: group.settings.loserPaysFirstRound,
       extraPrizeOptions: group.settings.extraPrizeOptions.map((o) => ({ key: o.key, label: o.label, emoji: o.emoji })),
+      season: { mode: group.settings.season?.mode || 'annuale', startMonth: group.settings.season?.startMonth || 9 },
     },
     createdAt: group.createdAt,
     ...extra,
@@ -104,7 +105,10 @@ async function update(group, user, data) {
   group.set(rest);
   if (settings) {
     const { extraPrizeOptions, ...otherSettings } = settings;
-    for (const [k, v] of Object.entries(otherSettings)) group.settings[k] = v;
+    for (const [k, v] of Object.entries(otherSettings)) {
+      if (k === 'season') for (const [sk, sv] of Object.entries(v)) group.settings.season[sk] = sv;
+      else group.settings[k] = v;
+    }
     if (extraPrizeOptions) {
       const baseKeys = appConfig.prizeOptions.map((p) => p.key);
       group.settings.extraPrizeOptions = extraPrizeOptions.map((o, i) => {

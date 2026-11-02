@@ -14,6 +14,7 @@ module.exports = {
   Poll: require('./Poll'),
   PushSubscription: require('./PushSubscription'),
   Rivalry: require('./Rivalry'),
+  Season: require('./Season'),
   MvpVote,
   Rating,
   PrizeVote,
