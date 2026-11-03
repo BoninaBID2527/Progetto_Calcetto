@@ -18,6 +18,12 @@ export default defineConfig({
       '/socket.io': { target: backend, ws: true },
     },
   },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.js'],
+    include: ['src/**/*.test.{js,jsx}'],
+    css: false,
+  },
   preview: {
     proxy: {
       '/api': backend,

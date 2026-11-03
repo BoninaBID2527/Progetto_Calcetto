@@ -41,6 +41,7 @@ module.exports = defineConfig({
         JWT_SECRET: 'segreto-dei-test-e2e',
         CLIENT_ORIGIN: `http://localhost:${WEB_PORT}`,
         SCHEDULER_ENABLED: 'false',
+        RATE_LIMIT_ENABLED: 'false', // i test accedono con molti utenti dallo stesso IP
       },
     },
     {

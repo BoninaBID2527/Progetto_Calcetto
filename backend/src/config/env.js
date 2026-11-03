@@ -16,6 +16,16 @@ const config = {
   clientOrigin: (process.env.CLIENT_ORIGIN || 'http://localhost:5173').split(',').map((s) => s.trim()),
   schedulerEnabled: process.env.SCHEDULER_ENABLED !== 'false' && nodeEnv !== 'test',
   schedulerIntervalMs: Number(process.env.SCHEDULER_INTERVAL_MS) || 60_000,
+  // Dietro un proxy (nginx, Render, …) impostare TRUST_PROXY (es. 1) perché i limiti usino l'IP reale del client.
+  trustProxy: process.env.TRUST_PROXY ? (Number.isNaN(Number(process.env.TRUST_PROXY)) ? process.env.TRUST_PROXY : Number(process.env.TRUST_PROXY)) : false,
+  rateLimit: {
+    enabled: process.env.RATE_LIMIT_ENABLED !== 'false' && nodeEnv !== 'test',
+    windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 60_000,
+    apiMax: Number(process.env.RATE_LIMIT_API_MAX) || 600, // richieste per finestra e per IP
+    authWindowMs: Number(process.env.RATE_LIMIT_AUTH_WINDOW_MS) || 15 * 60_000,
+    loginMax: Number(process.env.RATE_LIMIT_LOGIN_MAX) || 20, // accessi falliti per finestra e per IP
+    registerMax: Number(process.env.RATE_LIMIT_REGISTER_MAX) || 20, // registrazioni per finestra e per IP
+  },
   // Web Push: senza le due chiavi le push restano spente (le notifiche in-app funzionano comunque).
   vapid: {
     publicKey: process.env.VAPID_PUBLIC_KEY || '',

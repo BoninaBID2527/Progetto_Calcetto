@@ -17,7 +17,8 @@ function Winners({ award }) {
     return <p className="muted">{award.mode === 'automatico' ? 'Nessun marcatore inserito: questo premio resta senza vincitore.' : 'Nessun voto: stavolta nessun vincitore.'}</p>;
   }
   return (
-    <ul className="award-winners" role="status">
+    <div role="status">
+    <ul className="award-winners">
       {award.winners.map((u, i) => (
         <motion.li
           key={u.id}
@@ -37,6 +38,7 @@ function Winners({ award }) {
         </motion.li>
       ))}
     </ul>
+    </div>
   );
 }
 

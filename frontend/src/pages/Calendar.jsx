@@ -198,12 +198,16 @@ export default function Calendar() {
         <div className="grid-main-side">
           <div className="stack">
             <div className={`cal-grid ${view === 'settimana' ? 'is-week' : ''}`} role="grid" aria-label={titleFor(view, cursor)}>
-              {WEEKDAYS_SHORT.map((w) => (
-                <div key={w} className="cal-head" role="columnheader">
-                  {w}
-                </div>
-              ))}
-              {days.map((d) => {
+              <div className="cal-row" role="row">
+                {WEEKDAYS_SHORT.map((w) => (
+                  <div key={w} className="cal-head" role="columnheader">
+                    {w}
+                  </div>
+                ))}
+              </div>
+              {Array.from({ length: days.length / 7 }, (_, row) => days.slice(row * 7, row * 7 + 7)).map((week) => (
+                <div key={week[0]} className="cal-row" role="row">
+                  {week.map((d) => {
                 const items = byDay[d] || [];
                 const outside = view === 'mese' && d.slice(0, 7) !== cursor.slice(0, 7);
                 const av = data.availability[d];
@@ -228,7 +232,9 @@ export default function Calendar() {
                     {av?.mine && <span className={`cal-av av-${av.mine}`} aria-hidden="true" />}
                   </button>
                 );
-              })}
+                  })}
+                </div>
+              ))}
             </div>
           </div>
           <div className="stack">

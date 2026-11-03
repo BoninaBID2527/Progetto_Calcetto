@@ -7,16 +7,27 @@ const morgan = require('morgan');
 const config = require('./config/env');
 const routes = require('./routes');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+const { createLimiters } = require('./middleware/rateLimit');
+const { rejectOperatorKeys } = require('./middleware/sanitize');
 
-function createApp() {
+function createApp(options = {}) {
+  const limits = { ...config.rateLimit, ...(options.rateLimit || {}) };
   const app = express();
   app.disable('x-powered-by');
+  if (config.trustProxy) app.set('trust proxy', config.trustProxy);
   app.use(helmet());
   app.use(cors({ origin: config.clientOrigin }));
   // Limite ampio quanto basta per una foto profilo ridimensionata.
   app.use(express.json({ limit: '300kb' }));
+  app.use(rejectOperatorKeys);
   if (!config.isTest) app.use(morgan(config.isProduction ? 'combined' : 'dev'));
 
+  if (limits.enabled) {
+    const limiters = createLimiters(limits);
+    app.use('/api', limiters.api);
+    app.use('/api/auth/login', limiters.login);
+    app.use('/api/auth/register', limiters.register);
+  }
   app.use('/api', routes);
   app.use(notFoundHandler);
   app.use(errorHandler);

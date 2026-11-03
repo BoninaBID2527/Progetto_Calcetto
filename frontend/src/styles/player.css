@@ -317,7 +317,11 @@
   gap: var(--space-3);
   padding: 8px 10px;
   border-radius: var(--radius-m);
-  opacity: 0.8;
+}
+
+/* Edizioni ancora bloccate: attenuate senza opacità, per tenere il contrasto AA. */
+.editions li:not(.is-unlocked) .player-name {
+  color: var(--c-text-2);
 }
 
 .editions li.is-unlocked {

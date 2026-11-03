@@ -97,10 +97,38 @@ function EntryForm({ group, admin, onClose, onSaved }) {
   );
 }
 
+/** Motivo obbligatorio per annullare una voce già confermata: resta nello storico. */
+function CancelDialog({ onClose, onConfirm }) {
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState('');
+  return (
+    <Modal title="Annullare una voce confermata" onClose={onClose}>
+      <form
+        className="stack"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!reason.trim()) return setError('Il motivo è obbligatorio.');
+          return onConfirm(reason.trim());
+        }}
+      >
+        <p className="muted">La voce resta nello storico come annullata e smette di contare nei saldi.</p>
+        <FormField label="Motivo" error={error}>
+          {(p) => <input {...p} className="input" maxLength={200} autoFocus value={reason} onChange={(e) => setReason(e.target.value)} />}
+        </FormField>
+        <button type="submit" className="btn btn-danger-solid">
+          Annulla la voce
+        </button>
+      </form>
+    </Modal>
+  );
+}
+
 function EntryRow({ e, canManage, onChange, meId }) {
   const toast = useToast();
   const confirm = useConfirm();
   const [open, setOpen] = useState(false);
+  const [asking, setAsking] = useState(false);
   const mineDeclared = e.status === 'dichiarato' && (e.user?.id === meId || e.createdBy.id === meId);
 
   const run = async (path, body) => {
@@ -112,12 +140,9 @@ function EntryRow({ e, canManage, onChange, meId }) {
     }
   };
   const cancel = async () => {
-    let reason = '';
-    if (e.status === 'verificato') {
-      reason = window.prompt('Motivo dell\'annullamento (resta nello storico):') || '';
-      if (!reason.trim()) return;
-    } else if (!(await confirm({ title: 'Annullare la voce?', message: 'Resterà nello storico come annullata.', confirmLabel: 'Annulla la voce', danger: true }))) return;
-    run(`/groups/${e.groupId}/ledger/${e.id}/cancel`, { reason });
+    if (e.status === 'verificato') return setAsking(true);
+    if (!(await confirm({ title: 'Annullare la voce?', message: 'Resterà nello storico come annullata.', confirmLabel: 'Annulla la voce', danger: true }))) return undefined;
+    return run(`/groups/${e.groupId}/ledger/${e.id}/cancel`, { reason: '' });
   };
 
   return (
@@ -165,6 +190,15 @@ function EntryRow({ e, canManage, onChange, meId }) {
           <Icon name="history" /> Storico
         </button>
       </div>
+      {asking && (
+        <CancelDialog
+          onClose={() => setAsking(false)}
+          onConfirm={async (reason) => {
+            setAsking(false);
+            await run(`/groups/${e.groupId}/ledger/${e.id}/cancel`, { reason });
+          }}
+        />
+      )}
       {open && (
         <ol className="ledger-history">
           {e.history.map((h, i) => (
