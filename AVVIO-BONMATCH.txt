@@ -1,0 +1,86 @@
+BONMATCH - AVVIO RAPIDO
+=======================
+
+Serve: Node.js 20 o piu' recente (consigliato 22) e Docker Desktop.
+Apri TRE finestre di PowerShell nella cartella del progetto.
+
+FINESTRA 1 - MongoDB
+--------------------
+docker compose up -d
+
+FINESTRA 2 - Backend (API su http://localhost:4000/api)
+-------------------------------------------------------
+cd backend
+Copy-Item .env.example .env
+npm install
+npm run seed
+npm run dev
+
+FINESTRA 3 - Frontend
+---------------------
+cd frontend
+npm install
+npm run dev
+
+Poi apri il browser su:  http://localhost:5173
+
+
+ACCOUNT DI PROVA (password per tutti: calcetto2026)
+---------------------------------------------------
+marco@calcetto.test       Marco Rossi       admin del gruppo "Calcetto del giovedi'"
+luca@calcetto.test        Luca Bianchi      admin di entrambi i gruppi
+andrea@calcetto.test      Andrea Ferrero
+davide@calcetto.test      Davide Gallo
+simone@calcetto.test      Simone Rinaldi
+matteo@calcetto.test      Matteo Bruno
+stefano@calcetto.test     Stefano Costa
+paolo@calcetto.test       Paolo Ghigo       in lista d'attesa a Santena
+federico@calcetto.test    Federico Marino
+alessandro@calcetto.test  Alessandro Greco  in lista d'attesa in entrambi i gruppi
+
+Il seed crea i dati solo se mancano: puoi rilanciarlo senza perdere nulla.
+
+
+AGGIORNARE DA UNA VERSIONE PRECEDENTE
+-------------------------------------
+cd backend
+npm install
+npm run migrate        (sicuro da rilanciare: non cancella nulla)
+Poi riavvia il backend e, in frontend, "npm install".
+
+
+NOVITA' DELLA V2 DA PROVARE SUBITO (accedi come marco@calcetto.test)
+--------------------------------------------------------------------
+Calendario .......... menu "Calendario" (partite ricorrenti del giovedi', disponibilita', esporta .ics)
+Il club ............. menu "Il club" (motto, maglie, statistiche; da admin carichi lo stemma)
+Cassa ............... menu "Cassa" (quote confermate, saldo, spese)
+Classifiche ......... 12 classifiche e selettore delle stagioni
+Hall of Fame, Terzo tempo, BONWRAPPED .... nel menu del gruppo
+BONCARD ............. "La mia BONCARD" (overall, traguardi, esporta PNG)
+Notifiche push ...... Profilo > Notifiche (servono le chiavi VAPID: "npm run vapid" in backend)
+
+
+TEST
+----
+Backend:      cd backend   ->  npm test
+Frontend:     cd frontend  ->  npm test
+End-to-end:   cd e2e       ->  npm install   ->  npx playwright install chromium   ->  npm test
+Screenshot:   cd e2e       ->  $env:SCREENSHOTS="1"; npx playwright test tests/screenshots.spec.js
+Postman:      importa postman\BONMATCH.postman_collection.json (backend acceso)
+Dettagli:     docs\TEST.md
+
+
+SENZA DOCKER (solo per una prova veloce, dati in memoria)
+--------------------------------------------------------
+Nella FINESTRA 1, al posto di "docker compose up -d":
+cd backend
+npm run db:lite
+
+
+PROBLEMI FREQUENTI
+------------------
+"MongoDB non risponde"   -> Docker Desktop e' acceso? Riprova "docker compose up -d".
+Porta 4000 o 5173 occupata -> chiudi l'altra applicazione o cambia PORT nel file backend\.env.
+Pagina bianca            -> controlla che il backend (finestra 2) sia acceso.
+
+Guida completa: README.md, docs\GUIDA_UTILIZZO.md, docs\API.md, docs\TEST.md
