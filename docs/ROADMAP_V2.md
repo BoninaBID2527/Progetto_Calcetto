@@ -22,8 +22,8 @@ Documento vivo: lo aggiorno alla fine di ogni milestone. Se il lavoro si interro
 | M13 | Cassa del gruppo (registro dichiarato/verificato) | ✅ |
 | M14 | Terzo tempo evoluto | ✅ |
 | M15 | BONWRAPPED | ✅ |
-| M16 | Revisione schermate, test e2e, accessibilità, responsive | ⏳ |
-| M17 | Documentazione e consegna | ⏳ |
+| M16 | Revisione schermate, test e2e, accessibilità, responsive | ✅ |
+| M17 | Documentazione e consegna | ✅ |
 
 ## 1. Stato iniziale (audit del 2 novembre 2026, commit `e15613f`)
 
@@ -230,3 +230,16 @@ Ogni milestone chiusa aggiunge qui: cosa è stato fatto, file principali, test e
 - Frontend: `/gruppi/:id/wrapped` con schermate in stile storie (frecce da tastiera, indicatore di avanzamento cliccabile, ingresso animato con Motion, statico con animazioni ridotte), scelta del periodo (stagione corrente, tutto, passate), "Condividi questa schermata" (menu di condivisione o download) e "Scarica tutte" come PNG verticali 1080×1920 con gli stessi dati; collegamento dal profilo giocatore (`?utente=`).
 - Test: 230 backend verdi (9 nuovi in `wrapped.test.js`: dati insufficienti, fuori stagione, riepilogo, momenti, rivalità con soglia, premi e traguardi, progressione, classifiche, permessi). Verificato nel browser anche il PNG esportato.
 - Non verificato: condivisione nativa su telefoni reali (nel browser di prova si usa il download).
+
+### M16 — Revisione, sicurezza e test (✅)
+- **Sicurezza backend:** `express-rate-limit` (600 richieste al minuto per IP sulle API; 20 accessi **falliti** e 20 registrazioni ogni 15 minuti; `/health` esclusa; configurabile con `RATE_LIMIT_*` e `TRUST_PROXY`), middleware `rejectOperatorKeys` che rifiuta con 400 ogni chiave con `$` o `.` in corpo, query e parametri, verifica di helmet, CORS e token. 10 test in `security.test.js` (il limite si prova con un'app creata ad hoc; nei test e nei test end-to-end è disattivato).
+- **Test frontend (Vitest + Testing Library):** 37 test su utilità di calendario, navigazione (nessun collegamento morto), schermate del BONWRAPPED, componenti (variazione di posizione, stemma, maglie, feed) e pagine con API simulate (classifiche, Hall of Fame, terzo tempo, BONWRAPPED, calendario, club) in stato di caricamento, errore, vuoto e con dati.
+- **End-to-end:** nuova `v2.spec.js` con due utenti (dichiarazione e conferma di un pagamento, premi, ricorrenza ed esportazione `.ics`, stemma e SVG rifiutato, classifiche, Hall of Fame, terzo tempo, BONWRAPPED); `a11y.spec.js` esteso da 13 a 26 schermate (spogliatoio, convocazioni, BONCARD, MATCHDAY, partita con premi, rivalità, Hall of Fame, calendario, club, cassa, terzo tempo, BONWRAPPED), in tema scuro e chiaro e a 390 px; scenario condiviso in `support/scenario.js`; `screenshots.spec.js` a richiesta (`SCREENSHOTS=1`) con 23 schermate a 390, 768, 1280 e 1920 px in `docs/screenshots/v2` (JPEG) e controllo dell'overflow.
+- **Problemi trovati e corretti dalla revisione:** testi di spiegazione accanto a caselle e interruttori che facevano scorrere la pagina in orizzontale a 768 e 1280 px; griglia del calendario senza la struttura ARIA di righe (`aria-required-parent`); contrasto delle edizioni bloccate della BONCARD (usavano `opacity`); elenco dei vincitori dei premi dentro un elemento `role=status` (perdeva la semantica di lista); contrasto del testo arancio nel tema chiaro (4,39 → 4,87:1); barre `.progress` invisibili fuori dalle classifiche; `window.prompt` della cassa sostituito da una finestra accessibile con motivo obbligatorio.
+- Esito: 240 test backend (di cui 10 di sicurezza) e 37 frontend verdi; 19 end-to-end: nella suite completa 16 verdi, mentre i 3 di accessibilità hanno segnalato i problemi elencati sopra e, dopo le correzioni, sono stati rieseguiti da soli e sono tutti verdi (4 minuti). Non è stata rifatta un'ultima esecuzione unica di tutti e 19 dopo le correzioni.
+- Non verificato: lettori di schermo reali; Safari e Firefox (i test girano su Chromium); schermate su telefoni fisici.
+
+### M17 — Documentazione e consegna (✅)
+- README riscritto per la V2, `AVVIO.txt`, `docs/GUIDA_UTILIZZO.md` (percorsi 12-21), `docs/ARCHITETTURA.md` (modelli finali, sicurezza), `docs/DECISIONI.md` (29-47), nuovi `docs/API.md` e `docs/TEST.md`, questa roadmap.
+- Seed non distruttivo esteso: motto e maglie del club, premi attivi, una ricorrenza del giovedì, disponibilità e registro della cassa dalle quote già segnate (ogni passo idempotente: la seconda esecuzione non crea nulla).
+- Il testo del prompt originale (`PROMPT_V2.md`) non è nel repository, su richiesta.

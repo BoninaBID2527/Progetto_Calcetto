@@ -22,8 +22,8 @@ React (Vite, PWA) ──REST──▶ Express ──▶ servizi di dominio ─�
 | Modello | Campi nuovi |
 |---|---|
 | `User` | `notificationPrefs { push: Boolean, categories { boncall, partite, promemoria, risultati, social }, quietHours { enabled, start: "23:00", end: "08:00" }, maxPushPerHour: 6 }`, `settings.motion: "auto" \| "ridotto"` |
-| `Group` | `motto`, `secondaryColor`, `crestUrl`, `coverUrl`, `kits { light, dark }`, `settings.season { mode: "annuale" \| "trimestrale" \| "mensile" \| "personalizzata", startMonth: 9 }`, `settings.awards { portiere, difensore, bomber, sorpresa, ironico { enabled, label } }`, `settings.cashbox: Boolean` |
-| `Match` | `fromPoll` (indice unico parziale), `series`, `occurrenceKey` (indice unico `{series, occurrenceKey}`), `awards [{ key, label, mode }]`, `awardWinners [{ key, users }]`, `participants[].payment: "da_pagare" \| "dichiarato" \| "verificato"` (il vecchio `paid` resta, derivato) |
+| `Group` | `motto`, `secondaryColor`, `crestUrl`, `coverUrl` (data URL), `kits { light, dark } { primary, secondary }`, `settings.season { mode: "annuale" \| "trimestrale" \| "mensile" \| "personalizzata", startMonth: 9 }`, `settings.awards { portiere, difensore, bomber, sorpresa, ironico { enabled, label } }`, `settings.cashbox: Boolean`, `settings.timezone: "Europe/Rome"` |
+| `Match` | `fromPoll` (indice unico parziale), `series`, `occurrenceKey` (indice unico `{series, occurrenceKey}`), `detached` (modificata a mano), `awards [{ key, label, mode: "voto" \| "automatico" \| "assegnato" }]`, `awardWinners [{ key, users }]`, `voting.awardsClosed`, `participants[].payment: "da_pagare" \| "dichiarato" \| "verificato"` (il vecchio `paid` resta, derivato = verificato) |
 | `Rating` | `attributes { vel, tir, pas, dri, dif, fis }` facoltativi, ognuno 1-10 |
 | `Notification` | `category`, `dedupeKey` (unico per utente quando presente), `pushedAt`, `pushStatus` |
 
@@ -38,8 +38,9 @@ React (Vite, PWA) ──REST──▶ Express ──▶ servizi di dominio ─�
 | `AwardVote` | `match, voter, award, nominee` (unico `{match, voter, award}`) |
 | `Achievement` | `user, group, key, match, unlockedAt` (unico `{user, group, key}`) |
 | `Rivalry` | `group, users [a, b], createdBy, status: "proposta" \| "attiva" \| "rifiutata"` |
-| `MatchSeries` | `group, organizer, field, weekday, time "HH:MM", durationMinutes, slots, costCents, notes, startDate, endDate, active` |
-| `LedgerEntry` | `group, kind: "quota" \| "versamento" \| "spesa" \| "rimborso", match, member, amountCents, status: "dichiarato" \| "verificato" \| "annullato", note, createdBy, verifiedBy, verifiedAt, history [{ at, by, action }]` |
+| `MatchSeries` | `group, organizer, field, weekday (ISO 1-7), time "HH:MM" (fuso del gruppo), durationMinutes, slots, costCents, notes, startsOn, endsOn, active, generatedUntil` |
+| `Availability` | `group, user, date "AAAA-MM-GG", status` (unico `{group, user, date}`) |
+| `LedgerEntry` | `group, type: "quota" \| "versamento" \| "spesa" \| "rimborso", status: "dichiarato" \| "verificato" \| "annullato", amountCents, user, match, paidFrom: "cassa" \| "membro" (spese), note, createdBy, verifiedBy/At, cancelledBy/At, cancelReason, history [{ at, by, action, from, to, note }]` (una sola quota per `{match, user}`) |
 
 ## BONCALL
 
@@ -92,31 +93,40 @@ Il contesto (gruppo o carriera) è sempre dichiarato. La carriera somma tutti i 
 
 Ogni gruppo sceglie la modalità: annuale (default, dal mese di inizio, 1 settembre come in V1), trimestrale, mensile o personalizzata (stagioni create dall'admin, senza sovrapposizioni). Le stagioni sono finestre temporali sulle partite: nessuna statistica viene mai cancellata o archiviata a parte.
 
-## Endpoint nuovi (prefisso `/api`)
+## Endpoint
 
-| Area | Endpoint |
-|---|---|
-| Dashboard | `GET /groups/:id/dashboard`, `GET /groups/:id/activity?before=` |
-| BONCALL | `GET/POST /groups/:id/polls`, `GET /polls/:pid`, `PUT /polls/:pid/response`, `POST /polls/:pid/convert`, `POST /polls/:pid/cancel` |
-| Push | `GET /push/config`, `POST /push/subscriptions`, `DELETE /push/subscriptions`, `POST /push/test` |
-| Giocatori | `GET /groups/:id/players/:userId/card?scope=gruppo\|carriera`, `GET /groups/:id/players/:userId/progression`, `GET /groups/:id/players/:userId/achievements` |
-| MATCHDAY | `GET /matches/:mid/matchday` |
-| Rivalità | `GET /groups/:id/rivalries`, `GET /groups/:id/rivalries/:userId?with=`, `POST /groups/:id/rivalries`, `POST /rivalries/:rid/accept`, `POST /rivalries/:rid/decline` |
-| Stagioni | `GET /groups/:id/seasons`, `POST /groups/:id/seasons`, `DELETE /groups/:id/seasons/:sid`, `GET /groups/:id/rankings?season=`, `GET /groups/:id/hall-of-fame` |
-| Premi | `GET /matches/:mid/awards`, `POST /matches/:mid/awards/:key/vote`, `POST /matches/:mid/awards/:key/assign` |
-| Club | `POST/DELETE /groups/:id/crest`, `POST/DELETE /groups/:id/cover`, `GET /groups/:id/stats` |
-| Calendario | `GET /groups/:id/calendar?from=&to=`, `GET /groups/:id/calendar.ics`, `GET /matches/:mid/ics`, `GET/POST /groups/:id/series`, `PATCH/DELETE /series/:sid` |
-| Cassa | `GET /groups/:id/ledger`, `POST /groups/:id/ledger`, `POST /ledger/:eid/verify`, `POST /ledger/:eid/cancel`, `PATCH /matches/:mid/participants/:userId/payment` (esteso) |
-| Terzo tempo | `GET /groups/:id/third-half?season=` |
-| BONWRAPPED | `GET /groups/:id/wrapped?season=&userId=` |
+L'elenco completo e aggiornato delle rotte, con permessi e formati, è in [API.md](API.md). Qui restano i principi:
+
+- Tutto passa dal REST; Socket.IO trasmette solo dopo il salvataggio e solo identificativi o dati già visibili al gruppo. Alla riconnessione ogni schermata ricarica dal REST.
+- Ogni rotta di gruppo passa da `loadGroup` (403 se non membro) e, dove serve, da `requireGroupAdmin` o `requireMatchManager`; i dati sensibili (saldi, email) sono filtrati nei servizi, non nell'interfaccia.
+- Le operazioni che non devono ripetersi sono idempotenti per costruzione: indici unici (`{match, user}` per le quote, `{series, occurrenceKey}` per le ricorrenze, `{user, group, key}` per i traguardi, `{match, voter, award}` per i voti) e passaggi di stato atomici con `findOneAndUpdate` condizionato allo stato di partenza.
+
+## Moduli aggiunti nelle ultime milestone
+
+| Area | File principali | Note |
+|---|---|---|
+| Stagioni | `seasonService`, `Season` | finestre temporali sulle partite; la modalità personalizzata richiede le stagioni create dall'admin |
+| Classifiche | `rankingService` | funzione pura `computeRankings` con 12 definizioni; ogni definizione dichiara requisito e stato "non disponibile" |
+| Hall of Fame | `hallOfFameService` | solo dati reali via `statsEngine` |
+| Premi e traguardi | `awardsService`, `achievementService`, `AwardVote`, `Achievement` | bomber automatico, voto anonimo o assegnazione; traguardi ricalcolati dopo risultato e chiusura MVP |
+| Club | `clubService`, `utils/image`, `middleware/upload` | upload in memoria, tipo dai primi byte, data URL; niente file su disco |
+| Calendario | `utils/zone`, `seriesService`, `calendarService`, `MatchSeries`, `Availability` | fusi IANA senza librerie, occorrenze idempotenti, `.ics` con orari UTC |
+| Cassa | `cashboxService`, `LedgerEntry` | registro dichiarato/verificato/annullato con storico per voce; `Match.participants[].payment` è lo specchio per partita |
+| Terzo tempo | `thirdHalfService` | solo dati aggregati e anonimi |
+| BONWRAPPED | `wrappedService` | le sezioni senza dati vengono omesse; con poche partite risponde `enough: false` |
+| Sicurezza | `middleware/rateLimit`, `middleware/sanitize` | limiti per IP configurabili; chiavi `$` e `.` rifiutate in corpo, query e parametri |
 
 ## Sicurezza
 
-- Rate limiting: rotte di accesso 20 richieste ogni 15 minuti per IP, API 600 al minuto (configurabili; alti nei test).
-- Difesa contro l'operator injection: il middleware `rejectMongoOperators` respinge con 400 ogni chiave che inizi con `$` o contenga `.` nel corpo e nei parametri di query.
-- Upload: `multer` in memoria, dimensione massima, tipo verificato dai primi byte (PNG, JPEG, WebP; niente SVG), salvato come data URL.
-- Socket.IO: il client non può inviare azioni; le stanze le decide il server.
-- Subscription push: solo endpoint `https`, massimo 10 per utente, cancellazione solo delle proprie.
+- JWT con revoca (logout) e socket chiusi alla revoca; password con bcrypt.
+- Permessi per gruppo e per organizzatore applicati dal server su ogni rotta; chi non è nel gruppo riceve 403.
+- Validazione di ogni corpo e query con zod (`strict`: i campi sconosciuti sono rifiutati); id non validi 400 prima di toccare il database.
+- Rate limiting (`express-rate-limit`): 600 richieste al minuto per IP sulle API; 20 accessi falliti ogni 15 minuti; 20 registrazioni ogni 15 minuti. Configurabile con `RATE_LIMIT_*`; con proxy impostare `TRUST_PROXY`.
+- Operator injection: ogni chiave con `$` o `.` in corpo, query o parametri è rifiutata con 400 prima di arrivare ai servizi.
+- Upload: `multer` in memoria con limite di peso (128 KB stemma, 700 KB copertina), un solo file, tipo reale dai primi byte (PNG, JPEG, WebP; niente SVG), salvataggio come data URL; i colori del club sono validati come `#RRGGBB`.
+- Socket.IO: autenticazione con lo stesso JWT, stanze decise dal server, nessuna azione dal client.
+- Push: solo endpoint `https`, massimo 10 per utente, rimozione automatica di quelle scadute; nessun dato sensibile nel payload.
+- Intestazioni `helmet`, CORS limitato a `CLIENT_ORIGIN`, nessun segreto nel repository (`.env` ignorato).
 
 ## Frontend
 

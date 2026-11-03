@@ -104,3 +104,38 @@ Per i percorsi con due persone apri una seconda finestra **in incognito** (o un 
 1. Nel **Profilo** carica una foto (viene ritagliata e ridotta nel browser), scegli ruolo e piede. Senza foto restano le iniziali colorate.
 2. Cambia il tema: **Scuro** o **Chiaro**.
 3. **Esci da questo dispositivo**: il token viene revocato sul server, quindi anche una copia del vecchio token non funziona più.
+
+
+## Novità della V2: percorsi di prova
+
+Dopo `npm run seed` (e, se vieni da una versione precedente, `npm run migrate`) accedi come `marco@calcetto.test`, admin di "Calcetto del giovedì". Il seed aggiunge anche: motto e maglie del club, una partita ricorrente ogni giovedì alle 21:00 a Santena, qualche disponibilità e il registro della cassa con le quote già pagate.
+
+### 12. Dashboard e BONCALL
+La home del gruppo (Spogliatoio) mostra la prossima partita con il conto alla rovescia, le azioni rapide, le votazioni da fare e il tuo campionato. Dal pulsante centrale in basso (o "BONCALL" in sidebar) crei una **convocazione**: data fissa oppure 2-5 alternative da votare. Gli altri rispondono "Ci sono / Forse / Non ci sono"; quando i posti sono completi puoi trasformarla in partita (una sola volta, anche con più clic).
+
+### 13. BONCARD, BONRATING e MATCHDAY
+"La mia BONCARD" mostra overall, attributi (solo se valutati), edizioni con il motivo per cui sono sbloccate o no, traguardi e andamento. **Esporta in PNG** produce l'immagine verticale. Nella votazione di una partita puoi dare i voti per abilità (facoltativi): alimentano gli attributi. In una partita futura, **MATCHDAY** mostra locandina, formazioni e rivalità in campo; **Bilancia** ripropone squadre diverse a ogni clic.
+
+### 14. Stagioni, classifiche e Hall of Fame
+Da *Membri → Impostazioni (admin)* scegli la durata della stagione (annuale, trimestrale, mensile, personalizzata). In **Classifiche** il selettore del periodo include le stagioni passate; le frecce mostrano come è cambiata la posizione rispetto alla stagione precedente; una classifica senza abbastanza dati dice cosa manca. L'**Hall of Fame** raccoglie vincitori delle stagioni chiuse e record.
+
+### 15. Premi di partita e traguardi (due utenti)
+Da *Membri → Impostazioni* attiva i premi (bomber, portiere, difensore, sorpresa, premio ironico). Inserisci il risultato di una partita con i marcatori: il **bomber** compare da solo; gli altri premi si votano (anonimi) dalla scheda della partita, oppure li assegna l'organizzatore. I **traguardi** si sbloccano da soli (prima partita, 10 presenze, primo MVP…) e li vedi nella BONCARD.
+
+### 16. Club
+Apri **Il club**: motto, maglie, statistiche. Da admin carica uno **stemma** (PNG, JPEG o WebP fino a 128 KB): un SVG viene rifiutato. Lo stemma compare nell'intestazione del gruppo e nell'elenco dei gruppi.
+
+### 17. Calendario e partite ricorrenti
+**Calendario** mostra mese, settimana, prossime e passate, con filtro per gruppo. In *Nuova partita* spunta **Ripeti ogni settimana**: nascono le partite delle prossime settimane, ognuna modificabile o annullabile da sola. Scegli un giorno e un gruppo per indicare la tua disponibilità. **Esporta .ics** scarica il calendario per Google, Apple o Outlook.
+
+### 18. Cassa (due utenti)
+Nella scheda di una partita con costo, un giocatore tocca **Ho pagato** (stato "Dichiarato"); l'organizzatore vede la dichiarazione e tocca **Conferma**: solo da quel momento conta come pagato. In **Cassa** trovi il tuo saldo, il riepilogo per partita, le voci da confermare e lo storico con ogni passaggio. Gli admin vedono i saldi di tutti e possono registrare spese e rimborsi; con la **cassa comune** attiva i membri dichiarano versamenti. È solo un registro: nessun denaro passa dall'app.
+
+### 19. Terzo tempo
+**Terzo tempo** mostra le votazioni in corso con la scadenza, lo storico serata per serata, il premio più scelto e le preferenze, filtrabili per stagione. I voti restano anonimi. "Chi perde offre il primo giro" (impostazione facoltativa) compare solo come informazione.
+
+### 20. BONWRAPPED
+Da *BONWRAPPED* scorri le schermate della tua stagione (frecce o tastiera) e condividi o scarica ogni schermata come immagine verticale. Con meno di 3 partite l'app lo dice invece di mostrare numeri.
+
+### 21. Notifiche push e app installabile
+In *Profilo → Notifiche* il permesso si chiede solo quando tocchi "Attiva". Servono le chiavi VAPID (`npm run vapid` nella cartella `backend`, poi copiale in `.env`) e il sito in HTTPS (o `localhost`). Su iPhone funziona solo dopo aver aggiunto l'app alla schermata Home. L'app è installabile come PWA e mostra una pagina offline senza rete.

@@ -22,6 +22,10 @@ const { appConfig, DEFAULTS } = require('../config/appConfig');
 const { generateInviteCode } = require('../utils/helpers');
 const { backfillActivity } = require('./backfill');
 const achievementService = require('../services/achievementService');
+const cashboxService = require('../services/cashboxService');
+const seriesService = require('../services/seriesService');
+const { MatchSeries, Availability } = require('../models');
+const { ymdIn, addDays } = require('../utils/zone');
 
 const PASSWORD = 'calcetto2026';
 const DAY = 86_400_000;
@@ -394,6 +398,55 @@ async function seedPolls(u) {
   return created;
 }
 
+/**
+ * Dati dimostrativi delle funzioni della V2. Ogni passo è idempotente e non
+ * sovrascrive nulla che qualcuno abbia già configurato.
+ */
+async function seedV2(byKey) {
+  const out = { club: 0, series: 0, availability: 0, payments: 0 };
+  const group = await Group.findOne({ name: 'Calcetto del giovedì' });
+  if (!group) return out;
+
+  // Identità del club e premi di partita (solo se ancora vuoti).
+  let changed = false;
+  if (!group.motto) {
+    group.motto = 'Il giovedì non si discute';
+    group.secondaryColor = '#C7FF36';
+    group.kits.light = { primary: '#F4F8F2', secondary: '#111915' };
+    group.kits.dark = { primary: '#1B2A22', secondary: '#C7FF36' };
+    out.club = 1;
+    changed = true;
+  }
+  const a = group.settings.awards;
+  if (!a.portiere && !a.difensore && !a.bomber && !a.sorpresa && !a.ironico?.enabled) {
+    group.settings.awards.bomber = true;
+    group.settings.awards.portiere = true;
+    changed = true;
+  }
+  if (changed) await group.save();
+
+  // Una partita ricorrente ogni giovedì sera.
+  if (!(await MatchSeries.exists({ group: group._id }))) {
+    const organizer = byKey.marco?._id || group.createdBy;
+    const series = await MatchSeries.create({ group: group._id, organizer, field: 'santena', weekday: 4, time: '21:00', startsOn: ymdIn(new Date()), slots: 10, costCents: 6000, notes: 'Ricorrenza dimostrativa del giovedì' });
+    out.series = (await seriesService.materialize(series, group)).length;
+  }
+
+  // Qualche disponibilità per i prossimi giorni.
+  const today = ymdIn(new Date());
+  const picks = [['marco', 2, 'disponibile'], ['luca', 2, 'disponibile'], ['andrea', 2, 'forse'], ['davide', 3, 'non_disponibile'], ['simone', 3, 'disponibile']];
+  for (const [key, days, status] of picks) {
+    const user = byKey[key];
+    if (!user) continue;
+    const res = await Availability.updateOne({ group: group._id, user: user._id, date: addDays(today, days) }, { $setOnInsert: { status } }, { upsert: true });
+    out.availability += res.upsertedCount || 0;
+  }
+
+  // I pagamenti già segnati diventano quote verificate nel registro della cassa.
+  out.payments = await cashboxService.backfillFromLegacy();
+  return out;
+}
+
 async function main() {
   await connectDatabase(config.mongoUri);
   const { byKey, created } = await ensureUsers();
@@ -401,12 +454,14 @@ async function main() {
   // Il feed dei gruppi nasce dagli eventi già salvati (idempotente).
   summary.activities = await backfillActivity();
   summary.polls = await seedPolls(byKey);
+  summary.v2 = await seedV2(byKey);
   // Traguardi dallo storico dimostrativo (idempotente, senza notifiche).
   summary.achievements = 0;
   for (const g of await Group.find().select('_id').lean()) summary.achievements += await achievementService.evaluateGroup(g._id, { notify: false });
   console.log(`Seed completato su ${config.mongoUri}`);
   console.log(`  utenti creati: ${created} (già presenti: ${USERS.length - created})`);
   console.log(`  gruppi creati: ${summary.groups}, partite: ${summary.matches}, messaggi: ${summary.messages}, voci del feed: ${summary.activities}, convocazioni: ${summary.polls}, traguardi: ${summary.achievements}`);
+  console.log(`  V2: club ${summary.v2.club}, partite ricorrenti ${summary.v2.series}, disponibilità ${summary.v2.availability}, quote importate nel registro ${summary.v2.payments}`);
   console.log(`  password di tutti gli account: ${PASSWORD}`);
   console.log('  account admin: marco@calcetto.test');
   await disconnectDatabase();
